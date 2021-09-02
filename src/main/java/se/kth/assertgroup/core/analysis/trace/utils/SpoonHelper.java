@@ -10,6 +10,7 @@ import spoon.reflect.declaration.CtElement;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 public class SpoonHelper {
@@ -45,19 +46,26 @@ public class SpoonHelper {
         return res;
     }
 
-    private static void removeChangedLinesFromMapping(LineMapping mapping, Operation op){
-        if(op instanceof InsertOperation){
-            removeNodeFromMapping(op.getDstNode(), mapping.getDstToSrc());
-        } else if(op instanceof DeleteOperation){
-            removeNodeFromMapping(op.getSrcNode(), mapping.getSrcToDst());
-        } else if(op instanceof MoveOperation || op instanceof UpdateOperation){
-            removeNodeFromMapping(op.getSrcNode(), mapping.getSrcToDst());
-            removeNodeFromMapping(op.getDstNode(), mapping.getDstToSrc());
+    private static void removeChangedLinesFromMapping(LineMapping mapping, Operation op) {
+        if (op instanceof InsertOperation) {
+            removeNodeFromMapping(op.getSrcNode(), mapping.getDstToSrc(), mapping.getDstNewLines());
+        } else if (op instanceof DeleteOperation) {
+            removeNodeFromMapping(op.getSrcNode(), mapping.getSrcToDst(), mapping.getSrcNewLines());
+        } else if (op instanceof MoveOperation || op instanceof UpdateOperation) {
+            removeNodeFromMapping(op.getSrcNode(), mapping.getSrcToDst(), mapping.getSrcNewLines());
+            removeNodeFromMapping(op.getDstNode(), mapping.getDstToSrc(), mapping.getDstNewLines());
         }
     }
 
-    private static void removeNodeFromMapping(CtElement dstNode, Map<Integer, Integer> mapping) {
-        IntStream.rangeClosed(dstNode.getPosition().getLine(), dstNode.getPosition().getEndLine())
-                .forEach(x -> mapping.remove(x));
+    private static void removeNodeFromMapping
+            (
+                    CtElement node,
+                    Map<Integer, Integer> mapping,
+                    Set<Integer> newLines
+            ) {
+        if (!node.getPosition().isValidPosition())
+            return;
+        IntStream.rangeClosed(node.getPosition().getLine(), node.getPosition().getEndLine())
+                .forEach(x -> { mapping.remove(x); newLines.add(x); });
     }
 }

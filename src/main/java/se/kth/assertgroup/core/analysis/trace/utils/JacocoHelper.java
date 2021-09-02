@@ -30,6 +30,7 @@ public class JacocoHelper {
     private static final String JACOCO_MVN_XML_PATH = "trace/jacoco_plugin_mvn.xml";
     private static final String JACOCO_REPORT_DIR_PATH = "target/site/jacoco";
     private static final String JACOCO_REPORT_FILENAME_SUFFIX = ".html";
+    private static final String JACOCO_REPORT_DEFAULT_DIR = "default";
 
     // MVN related keywords
     private static final String POM_FILENAME = "pom.xml";
@@ -51,7 +52,7 @@ public class JacocoHelper {
                 FileUtils.readFileToString(projectDir.toPath().resolve(modifiedFilePath).toFile(), "UTF-8");
         String className = Launcher.parseClass(sourceCode).getQualifiedName();
         Path jacocoReportHtmlPath = Path.of(projectDir.getPath(), JACOCO_REPORT_DIR_PATH,
-                className.substring(0, className.lastIndexOf(".")),
+                className.contains(".") ? className.substring(0, className.lastIndexOf(".")) : JACOCO_REPORT_DEFAULT_DIR,
                 modifiedFilePath.getFileName().toString() + JACOCO_REPORT_FILENAME_SUFFIX);
 
         LineCoverage res = new LineCoverage();

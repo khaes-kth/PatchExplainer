@@ -23,15 +23,40 @@
   display: table;
   clear: both;
 }
+
+.center {
+    border: 5px solid darkblue;
+    display: flex;
+    justify-content: center;
+}
 </style>
 </head>
 <body>
+<div class="row center">
+    <code>
+        <pre>
+@Test <br>
+public void test_main(){ <br>
+    String ret = NumberAnalyzer.analyze(1); <br>
+    assertThat(ret, containsString("greater")); <br>
+}
+        </pre>
+    </code>
+</div>
 <div class="row">
-    <div id="original-trace" class="column">
+    <div class="column">
+        <code>
+            <pre id="original-trace">
 
+            </pre>
+        </code>
     </div>
-    <div id="patched-trace" class="column">
+    <div class="column">
+        <code>
+            <pre id="patched-trace">
 
+            </pre>
+        </code>
     </div>
 </div>
 </body>
