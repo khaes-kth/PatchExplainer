@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>fully.qualified.MainClass</mainClass>
+                            <mainClass>se.kth.assertgroup.core.analysis.trace.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

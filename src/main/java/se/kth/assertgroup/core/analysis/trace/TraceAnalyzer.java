@@ -19,7 +19,7 @@ import java.util.*;
  * Given the original and patched mvn projects, a {@link TraceAnalyzer} generates the execution trace diff.
  */
 public class TraceAnalyzer {
-    private static final String FINAL_REPORT_TEMPLATE_PATH = "trace/final_report.html";
+    private static final String FINAL_REPORT_TEMPLATE_PATH = "/trace/final_report.html";
     private static final String FINAL_REPORT_DIR_PATH = "target/trace/";
     private static final String FINAL_REPORT_ORIGINAL_COL_ID = "original-trace";
     private static final String FINAL_REPORT_PATCHED_COL_ID = "patched-trace";
@@ -46,6 +46,9 @@ public class TraceAnalyzer {
     }
 
     public void generatedTraceDiff(File outputDir, String modifiedFilePathsStr, String reportConfigsStr) throws Exception {
+        if(modifiedFilePathsStr.isEmpty())
+            return;
+
         List<String> modifiedFilePaths = Arrays.asList(modifiedFilePathsStr.split(INPUT_STR_SEPARATOR));
         Map<String, LineMapping> filePathToLineMapping = new HashMap<>();
         for (String path : modifiedFilePaths)
@@ -77,8 +80,9 @@ public class TraceAnalyzer {
                 patchedLines =
                         FileUtils.readLines(patchedMvnDir.toPath().resolve(modifiedFilePath).toFile(), "UTF-8");
 
-        Document reportDoc =
-                Jsoup.parse(new File(TraceAnalyzer.class.getClassLoader().getResource(FINAL_REPORT_TEMPLATE_PATH).toURI()), "UTF-8");
+        String finalReportTemplate = new Scanner(CloverHelper.class.getResourceAsStream(FINAL_REPORT_TEMPLATE_PATH),
+                "UTF-8").useDelimiter("\\A").next();
+        Document reportDoc = Jsoup.parse(finalReportTemplate);
 
         Element originalCol = reportDoc.getElementById(FINAL_REPORT_ORIGINAL_COL_ID),
                 patchedCol = reportDoc.getElementById(FINAL_REPORT_PATCHED_COL_ID);

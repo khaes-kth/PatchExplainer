@@ -23,14 +23,15 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class CloverHelper {
     private static final Logger logger = LoggerFactory.getLogger(CloverHelper.class);
 
-    private static final String CLOVER_MVN_XML_PATH = "trace/clover_plugin_mvn.xml";
+    private static final String CLOVER_MVN_XML_PATH = "/trace/clover_plugin_mvn.xml";
     private static final String CLOVER_REPORT_PATH = "target/site/clover/clover.xml";
     private static final String CLOVER_TARGET_DESCRIPTOR_PATH = "clover-descriptor.xml";
-    private static final String CLOVER_RESOURCE_DESCRIPTOR_PATH = "trace/clover_descriptor.xml";
+    private static final String CLOVER_RESOURCE_DESCRIPTOR_PATH = "/trace/clover_descriptor.xml";
     private static final String CLOVER_SRC_PATH_KEYWORD = "{src-path}";
     private static final String CLOVER_FILE_REPORT_SELECTOR = "[path*=" + CLOVER_SRC_PATH_KEYWORD + "]";
 
@@ -81,7 +82,7 @@ public class CloverHelper {
 
     private static void runMvnTest(File projectDir) throws Exception {
         ProcessBuilder pb = new ProcessBuilder(
-                "mvn", "clean", "clover:setup", "test", "-fn", "clover:aggregate", "clover:clover",
+                "sudo", "mvn", "clean", "clover:setup", "test", "-fn", "clover:aggregate", "clover:clover",
                 "-Dmaven.clover.reportDescriptor=" + CLOVER_TARGET_DESCRIPTOR_PATH
         );
         pb.inheritIO();
@@ -111,12 +112,9 @@ public class CloverHelper {
         TransformerFactory.newInstance().newTransformer().transform(new DOMSource(pluginsElem), pluginsStreamResult);
         String pluginsStr = pluginsStreamResult.getWriter().toString();
         if (pluginsStr.indexOf(CLOVER_ID) < 0) {
-            URL resource = CloverHelper.class.getClassLoader().getResource(CLOVER_MVN_XML_PATH);
-            if (resource == null) {
-                throw new IllegalArgumentException("Clover plugin resource not found!");
-            }
+            String cloverXmlStr = new Scanner(CloverHelper.class.getResourceAsStream(CLOVER_MVN_XML_PATH),
+                    "UTF-8").useDelimiter("\\A").next();
 
-            String cloverXmlStr = FileUtils.readFileToString(new File(resource.toURI()), "UTF-8");
             Document cloverDoc = db.parse(new ByteArrayInputStream(cloverXmlStr.getBytes("UTF-8")));
             Node cloverNode = doc.importNode(cloverDoc.getDocumentElement(), true);
             pluginsElem.appendChild(cloverNode);
@@ -131,12 +129,10 @@ public class CloverHelper {
         // End of adding plugin to pom.xml
 
         // Adding clover descriptor
-        URL cloverDescriptorRsc = CloverHelper.class.getClassLoader().getResource(CLOVER_RESOURCE_DESCRIPTOR_PATH);
-        if (cloverDescriptorRsc == null) {
-            throw new IllegalArgumentException("Clover descriptor resource not found!");
-        }
-        FileUtils.copyFile(new File(cloverDescriptorRsc.toURI()),
-                projectDir.toPath().resolve(CLOVER_TARGET_DESCRIPTOR_PATH).toFile());
+        String descriptorText = new Scanner(CloverHelper.class.getResourceAsStream(CLOVER_RESOURCE_DESCRIPTOR_PATH),
+                "UTF-8").useDelimiter("\\A").next();
+        FileUtils.writeStringToFile(projectDir.toPath().resolve(CLOVER_TARGET_DESCRIPTOR_PATH).toFile(), descriptorText,
+                "UTF-8");
         // End of adding clover descriptor
 
     }
