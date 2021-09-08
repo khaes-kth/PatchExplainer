@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <title>Execution Trace Diff</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.test {
+    border: 1px solid darkblue;
+    padding-left: 10px;
+}
+</style> 
+ </head> 
+ <body> 
+  <div class="row test"> 
+   <h2>Differencing Test:</h2> <code> <pre>@Test <br>
+public void test_main(){ <br>
+    String ret = NumberAnalyzer.analyze(1); <br>
+    assertThat(ret, containsString("greater")); <br>
+}
+        </pre> </code> 
+  </div> 
+  <div class="row"> 
+   <div class="column"> 
+    <h2>Original Code:</h2> <code> <pre id="original-trace">           1:  <span style="background-color: white">      package com.deepoove.swagger.dubbo.annotations;</span><br>           2:  <span style="background-color: white">      </span><br>           3:  <span style="background-color: white">      import java.lang.annotation.Documented;</span><br>           4:  <span style="background-color: white">      import java.lang.annotation.Retention;</span><br>           5:  <span style="background-color: white">      import java.lang.annotation.Target;</span><br>           6:  <span style="background-color: white">      </span><br>           7:  <span style="background-color: white">      import org.springframework.context.annotation.ComponentScan;</span><br>           8:  <span style="background-color: white">      </span><br>           9:  <span style="background-color: white">      @Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)</span><br>          10:  <span style="background-color: white">      @Target(value = { java.lang.annotation.ElementType.TYPE })</span><br>          11:  <span style="background-color: white">      @Documented</span><br>          12:  <span style="background-color: white">      @ComponentScan(basePackages = { "com.deepoove.swagger.dubbo.config",</span><br>          13:  <span style="background-color: white">      		"com.deepoove.swagger.dubbo.web" })</span><br>          14:  <span style="background-color: white">      public @interface EnableDubboSwagger {</span><br>          15:  <span style="background-color: white">      </span><br>          16:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+   <div class="column"> 
+    <h2>Patched Code:</h2> <code> <pre id="patched-trace">        1-&gt;N:  <span style="background-color: white">      package com.deepoove.swagger.dubbo.annotations;</span><br>        2-&gt;N:  <span style="background-color: white">      </span><br>        3-&gt;N:  <span style="background-color: white">      import org.springframework.context.annotation.ComponentScan;</span><br>        4-&gt;N:  <span style="background-color: white">      </span><br>        5-&gt;N:  <span style="background-color: white">      import java.lang.annotation.Documented;</span><br>        6-&gt;N:  <span style="background-color: white">      import java.lang.annotation.Retention;</span><br>        7-&gt;N:  <span style="background-color: white">      import java.lang.annotation.Target;</span><br>        8-&gt;N:  <span style="background-color: white">      </span><br>        9-&gt;9:  <span style="background-color: white">      @Retention(value = java.lang.annotation.RetentionPolicy.RUNTIME)</span><br>      10-&gt;10:  <span style="background-color: white">      @Target(value = {java.lang.annotation.ElementType.TYPE})</span><br>      11-&gt;11:  <span style="background-color: white">      @Documented</span><br>      12-&gt;13:  <span style="background-color: white">      @ComponentScan(basePackages = {"com.deepoove.swagger.dubbo.config", "com.deepoove.swagger.dubbo.web"})</span><br>       13-&gt;N:  <span style="background-color: white">      public @interface EnableDubboSwagger {</span><br>       14-&gt;N:  <span style="background-color: white">      </span><br>       15-&gt;N:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+  </div>  
+ </body>
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <title>Execution Trace Diff</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.test {
+    border: 1px solid darkblue;
+    padding-left: 10px;
+}
+</style> 
+ </head> 
+ <body> 
+  <div class="row test"> 
+   <h2>Differencing Test:</h2> <code> <pre>@Test <br>
+public void test_main(){ <br>
+    String ret = NumberAnalyzer.analyze(1); <br>
+    assertThat(ret, containsString("greater")); <br>
+}
+        </pre> </code> 
+  </div> 
+  <div class="row"> 
+   <div class="column"> 
+    <h2>Original Code:</h2> <code> <pre id="original-trace">           1:  <span style="background-color: white">      /**</span><br>           2:  <span style="background-color: white">       * Copyright (C) 2018-2021 Expedia, Inc.</span><br>           3:  <span style="background-color: white">       *</span><br>           4:  <span style="background-color: white">       * Licensed under the Apache License, Version 2.0 (the "License");</span><br>           5:  <span style="background-color: white">       * you may not use this file except in compliance with the License.</span><br>           6:  <span style="background-color: white">       * You may obtain a copy of the License at</span><br>           7:  <span style="background-color: white">       *</span><br>           8:  <span style="background-color: white">       * http://www.apache.org/licenses/LICENSE-2.0</span><br>           9:  <span style="background-color: white">       *</span><br>          10:  <span style="background-color: white">       * Unless required by applicable law or agreed to in writing, software</span><br>          11:  <span style="background-color: white">       * distributed under the License is distributed on an "AS IS" BASIS,</span><br>          12:  <span style="background-color: white">       * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span><br>          13:  <span style="background-color: white">       * See the License for the specific language governing permissions and</span><br>          14:  <span style="background-color: white">       * limitations under the License.</span><br>          15:  <span style="background-color: white">       */</span><br>          16:  <span style="background-color: white">      package com.expediagroup.streamplatform.streamregistry.state;</span><br>          17:  <span style="background-color: white">      </span><br>          18:  <span style="background-color: white">      import static com.expediagroup.streamplatform.streamregistry.state.model.event.Event.LOAD_COMPLETE;</span><br>          19:  <span style="background-color: white">      import static lombok.AccessLevel.PACKAGE;</span><br>          20:  <span style="background-color: white">      </span><br>          21:  <span style="background-color: white">      import java.util.HashMap;</span><br>          22:  <span style="background-color: white">      import java.util.Map;</span><br>          23:  <span style="background-color: white">      import java.util.Optional;</span><br>          24:  <span style="background-color: white">      import java.util.concurrent.CompletableFuture;</span><br>          25:  <span style="background-color: white">      import java.util.stream.Collectors;</span><br>          26:  <span style="background-color: white">      import java.util.stream.Stream;</span><br>          27:  <span style="background-color: white">      </span><br>          28:  <span style="background-color: white">      import lombok.Getter;</span><br>          29:  <span style="background-color: white">      import lombok.NonNull;</span><br>          30:  <span style="background-color: white">      import lombok.RequiredArgsConstructor;</span><br>          31:  <span style="background-color: white">      import lombok.val;</span><br>          32:  <span style="background-color: white">      </span><br>          33:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.Entity;</span><br>          34:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.event.Event;</span><br>          35:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.specification.Specification;</span><br>          36:  <span style="background-color: white">      </span><br>          37:  <span style="background-color: white">      @RequiredArgsConstructor(access = PACKAGE)</span><br>          38:  <span style="background-color: white">      public class DefaultEntityView implements EntityView {</span><br>          39:  <span style="background-color: white">        @NonNull private final EventReceiver receiver;</span><br>          40:  <span style="background-color: white">        @NonNull private final Map
+       <entity.key>
+        <!--?-->, StateValue&gt; entities;
+       </entity.key></span><br>          41:  <span style="background-color: white">        @NonNull private final EntityViewUpdater updater;</span><br>          42:  <span style="background-color: white">      </span><br>          43:  <span style="background-color: white">        DefaultEntityView(EventReceiver receiver, Map
+       <entity.key>
+        <!--?-->, StateValue&gt; entities) {
+       </entity.key></span><br>          44:  <span style="background-color: white">          this(receiver, entities, new EntityViewUpdater(entities));</span><br>          45:  <span style="background-color: white">        }</span><br>          46:  <span style="background-color: white">      </span><br>          47:  <span style="background-color: white">        public DefaultEntityView(EventReceiver receiver) {</span><br>          48:  <span style="background-color: yellow">          this(receiver, new HashMap&lt;&gt;());</span><br>          49:  <span style="background-color: white">        }</span><br>          50:  <span style="background-color: white">      </span><br>          51:  <span style="background-color: white">        @Override</span><br>          52:  <span style="background-color: white">        public CompletableFuture
+       <void>
+         load(@NonNull EntityViewListener listener) {
+       </void></span><br>          53:  <span style="background-color: white">          val future = new CompletableFuture
+       <void>
+        ();
+       </void></span><br>          54:  <span style="background-color: white">          receiver.receive(new ReceiverListener(listener, future));</span><br>          55:  <span style="background-color: white">          return future;</span><br>          56:  <span style="background-color: white">        }</span><br>          57:  <span style="background-color: white">      </span><br>          58:  <span style="background-color: white">        @Override</span><br>          59:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Optional
+        <entity>
+         <k, s>
+          &gt; get(K key) {
+         </k,>
+        </entity>
+       </k></span><br>          60:  <span style="background-color: white">          return Optional.ofNullable(entities.get(key)).filter(it -&gt; !it.deleted).map(value -&gt; (Entity
+       <k, s>
+        ) value.entity);
+       </k,></span><br>          61:  <span style="background-color: white">        }</span><br>          62:  <span style="background-color: white">      </span><br>          63:  <span style="background-color: white">        @Override</span><br>          64:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Stream
+        <entity>
+         <k, s>
+          &gt; all(Class
+          <k>
+            keyClass) {
+          </k>
+         </k,>
+        </entity>
+       </k></span><br>          65:  <span style="background-color: white">          return entities.values().stream()</span><br>          66:  <span style="background-color: white">            .filter(it -&gt; !it.deleted)</span><br>          67:  <span style="background-color: white">            .filter(it -&gt; it.entity.getKey().getClass().equals(keyClass))</span><br>          68:  <span style="background-color: white">            .map(it -&gt; (Entity
+       <k, s>
+        ) it.entity);
+       </k,></span><br>          69:  <span style="background-color: white">        }</span><br>          70:  <span style="background-color: white">      </span><br>          71:  <span style="background-color: white">        @Override</span><br>          72:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Map
+        <k, optional<entity<k, s>
+         &gt;&gt; allDeleted(Class
+         <k>
+           keyClass) {
+         </k>
+        </k,>
+       </k></span><br>          73:  <span style="background-color: white">          return entities.entrySet().stream()</span><br>          74:  <span style="background-color: white">            .filter(it -&gt; it.getValue().deleted)</span><br>          75:  <span style="background-color: white">            .filter(it -&gt; it.getKey().getClass().equals(keyClass))</span><br>          76:  <span style="background-color: white">            .collect(Collectors.toMap(</span><br>          77:  <span style="background-color: white">              entry -&gt; (K)entry.getKey(),</span><br>          78:  <span style="background-color: white">              entry -&gt; Optional.ofNullable((Entity
+       <k, s>
+        )entry.getValue().entity))
+       </k,></span><br>          79:  <span style="background-color: white">            );</span><br>          80:  <span style="background-color: white">        }</span><br>          81:  <span style="background-color: white">      </span><br>          82:  <span style="background-color: white">        @Override</span><br>          83:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Optional
+        <entity>
+         <k, s>
+          &gt; purgeDeleted(K key) {
+         </k,>
+        </entity>
+       </k></span><br>          84:  <span style="background-color: white">          return updater.purge(key);</span><br>          85:  <span style="background-color: white">        }</span><br>          86:  <span style="background-color: white">      </span><br>          87:  <span style="background-color: white">        @Getter // for testing</span><br>          88:  <span style="background-color: white">        @RequiredArgsConstructor</span><br>          89:  <span style="background-color: white">        class ReceiverListener implements EventReceiverListener {</span><br>          90:  <span style="background-color: white">          private final EntityViewListener listener;</span><br>          91:  <span style="background-color: white">          private final CompletableFuture
+       <void>
+         future;
+       </void></span><br>          92:  <span style="background-color: white">      </span><br>          93:  <span style="background-color: white">          @Override</span><br>          94:  <span style="background-color: white">          public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; void onEvent(Event
+        <k, s>
+          event) {
+        </k,>
+       </k></span><br>          95:  <span style="background-color: white">            if (!future.isDone() &amp;&amp; event == LOAD_COMPLETE) {</span><br>          96:  <span style="background-color: white">              future.complete(null);</span><br>          97:  <span style="background-color: white">            } else {</span><br>          98:  <span style="background-color: white">              val oldEntity = updater.update(event);</span><br>          99:  <span style="background-color: white">              if (future.isDone()) {</span><br>         100:  <span style="background-color: white">                listener.onEvent(oldEntity, event);</span><br>         101:  <span style="background-color: white">              }</span><br>         102:  <span style="background-color: white">            }</span><br>         103:  <span style="background-color: white">          }</span><br>         104:  <span style="background-color: white">        }</span><br>         105:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+   <div class="column"> 
+    <h2>Patched Code:</h2> <code> <pre id="patched-trace">        1-&gt;N:  <span style="background-color: white">      /**</span><br>        2-&gt;N:  <span style="background-color: white">       * Copyright (C) 2018-2021 Expedia, Inc.</span><br>        3-&gt;N:  <span style="background-color: white">       *</span><br>        4-&gt;N:  <span style="background-color: white">       * Licensed under the Apache License, Version 2.0 (the "License");</span><br>        5-&gt;N:  <span style="background-color: white">       * you may not use this file except in compliance with the License.</span><br>        6-&gt;N:  <span style="background-color: white">       * You may obtain a copy of the License at</span><br>        7-&gt;N:  <span style="background-color: white">       *</span><br>        8-&gt;N:  <span style="background-color: white">       * http://www.apache.org/licenses/LICENSE-2.0</span><br>        9-&gt;N:  <span style="background-color: white">       *</span><br>       10-&gt;N:  <span style="background-color: white">       * Unless required by applicable law or agreed to in writing, software</span><br>       11-&gt;N:  <span style="background-color: white">       * distributed under the License is distributed on an "AS IS" BASIS,</span><br>       12-&gt;N:  <span style="background-color: white">       * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span><br>       13-&gt;N:  <span style="background-color: white">       * See the License for the specific language governing permissions and</span><br>       14-&gt;N:  <span style="background-color: white">       * limitations under the License.</span><br>       15-&gt;N:  <span style="background-color: white">       */</span><br>       16-&gt;N:  <span style="background-color: white">      package com.expediagroup.streamplatform.streamregistry.state;</span><br>       17-&gt;N:  <span style="background-color: white">      </span><br>       18-&gt;N:  <span style="background-color: white">      import static com.expediagroup.streamplatform.streamregistry.state.model.event.Event.LOAD_COMPLETE;</span><br>       19-&gt;N:  <span style="background-color: white">      import static lombok.AccessLevel.PACKAGE;</span><br>       20-&gt;N:  <span style="background-color: white">      </span><br>       21-&gt;N:  <span style="background-color: white">      import java.util.Map;</span><br>       22-&gt;N:  <span style="background-color: white">      import java.util.Optional;</span><br>       23-&gt;N:  <span style="background-color: white">      import java.util.concurrent.CompletableFuture;</span><br>       24-&gt;N:  <span style="background-color: white">      import java.util.concurrent.ConcurrentHashMap;</span><br>       25-&gt;N:  <span style="background-color: white">      import java.util.stream.Collectors;</span><br>       26-&gt;N:  <span style="background-color: white">      import java.util.stream.Stream;</span><br>       27-&gt;N:  <span style="background-color: white">      </span><br>       28-&gt;N:  <span style="background-color: white">      import lombok.Getter;</span><br>       29-&gt;N:  <span style="background-color: white">      import lombok.NonNull;</span><br>       30-&gt;N:  <span style="background-color: white">      import lombok.RequiredArgsConstructor;</span><br>       31-&gt;N:  <span style="background-color: white">      import lombok.val;</span><br>       32-&gt;N:  <span style="background-color: white">      </span><br>       33-&gt;N:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.Entity;</span><br>       34-&gt;N:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.event.Event;</span><br>       35-&gt;N:  <span style="background-color: white">      import com.expediagroup.streamplatform.streamregistry.state.model.specification.Specification;</span><br>       36-&gt;N:  <span style="background-color: white">      </span><br>      37-&gt;37:  <span style="background-color: white">      @RequiredArgsConstructor(access = PACKAGE)</span><br>       38-&gt;N:  <span style="background-color: white">      public class DefaultEntityView implements EntityView {</span><br>      39-&gt;39:  <span style="background-color: white">        @NonNull private final EventReceiver receiver;</span><br>      40-&gt;40:  <span style="background-color: white">        @NonNull private final Map
+       <entity.key>
+        <!--?-->, StateValue&gt; entities;
+       </entity.key></span><br>      41-&gt;41:  <span style="background-color: white">        @NonNull private final EntityViewUpdater updater;</span><br>       42-&gt;N:  <span style="background-color: white">      </span><br>      43-&gt;43:  <span style="background-color: white">        DefaultEntityView(EventReceiver receiver, Map
+       <entity.key>
+        <!--?-->, StateValue&gt; entities) {
+       </entity.key></span><br>      44-&gt;44:  <span style="background-color: white">          this(receiver, entities, new EntityViewUpdater(entities));</span><br>       45-&gt;N:  <span style="background-color: white">        }</span><br>       46-&gt;N:  <span style="background-color: white">      </span><br>      47-&gt;47:  <span style="background-color: white">        public DefaultEntityView(EventReceiver receiver) {</span><br>       48-&gt;U:  <span style="background-color: yellow">          this(receiver, new ConcurrentHashMap&lt;&gt;());</span><br>       49-&gt;N:  <span style="background-color: white">        }</span><br>       50-&gt;N:  <span style="background-color: white">      </span><br>      51-&gt;51:  <span style="background-color: white">        @Override</span><br>      52-&gt;52:  <span style="background-color: white">        public CompletableFuture
+       <void>
+         load(@NonNull EntityViewListener listener) {
+       </void></span><br>      53-&gt;53:  <span style="background-color: white">          val future = new CompletableFuture
+       <void>
+        ();
+       </void></span><br>      54-&gt;54:  <span style="background-color: white">          receiver.receive(new ReceiverListener(listener, future));</span><br>      55-&gt;55:  <span style="background-color: white">          return future;</span><br>       56-&gt;N:  <span style="background-color: white">        }</span><br>       57-&gt;N:  <span style="background-color: white">      </span><br>      58-&gt;58:  <span style="background-color: white">        @Override</span><br>      59-&gt;59:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Optional
+        <entity>
+         <k, s>
+          &gt; get(K key) {
+         </k,>
+        </entity>
+       </k></span><br>      60-&gt;60:  <span style="background-color: white">          return Optional.ofNullable(entities.get(key)).filter(it -&gt; !it.deleted).map(value -&gt; (Entity
+       <k, s>
+        ) value.entity);
+       </k,></span><br>       61-&gt;N:  <span style="background-color: white">        }</span><br>       62-&gt;N:  <span style="background-color: white">      </span><br>      63-&gt;63:  <span style="background-color: white">        @Override</span><br>      64-&gt;64:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Stream
+        <entity>
+         <k, s>
+          &gt; all(Class
+          <k>
+            keyClass) {
+          </k>
+         </k,>
+        </entity>
+       </k></span><br>      65-&gt;65:  <span style="background-color: white">          return entities.values().stream()</span><br>      66-&gt;66:  <span style="background-color: white">            .filter(it -&gt; !it.deleted)</span><br>      67-&gt;67:  <span style="background-color: white">            .filter(it -&gt; it.entity.getKey().getClass().equals(keyClass))</span><br>      68-&gt;68:  <span style="background-color: white">            .map(it -&gt; (Entity
+       <k, s>
+        ) it.entity);
+       </k,></span><br>       69-&gt;N:  <span style="background-color: white">        }</span><br>       70-&gt;N:  <span style="background-color: white">      </span><br>      71-&gt;71:  <span style="background-color: white">        @Override</span><br>      72-&gt;72:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Map
+        <k, optional<entity<k, s>
+         &gt;&gt; allDeleted(Class
+         <k>
+           keyClass) {
+         </k>
+        </k,>
+       </k></span><br>      73-&gt;73:  <span style="background-color: white">          return entities.entrySet().stream()</span><br>      74-&gt;74:  <span style="background-color: white">            .filter(it -&gt; it.getValue().deleted)</span><br>      75-&gt;75:  <span style="background-color: white">            .filter(it -&gt; it.getKey().getClass().equals(keyClass))</span><br>      76-&gt;76:  <span style="background-color: white">            .collect(Collectors.toMap(</span><br>      77-&gt;77:  <span style="background-color: white">              entry -&gt; (K)entry.getKey(),</span><br>      78-&gt;78:  <span style="background-color: white">              entry -&gt; Optional.ofNullable((Entity
+       <k, s>
+        )entry.getValue().entity))
+       </k,></span><br>       79-&gt;N:  <span style="background-color: white">            );</span><br>       80-&gt;N:  <span style="background-color: white">        }</span><br>       81-&gt;N:  <span style="background-color: white">      </span><br>      82-&gt;82:  <span style="background-color: white">        @Override</span><br>      83-&gt;83:  <span style="background-color: white">        public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; Optional
+        <entity>
+         <k, s>
+          &gt; purgeDeleted(K key) {
+         </k,>
+        </entity>
+       </k></span><br>      84-&gt;84:  <span style="background-color: white">          return updater.purge(key);</span><br>       85-&gt;N:  <span style="background-color: white">        }</span><br>       86-&gt;N:  <span style="background-color: white">      </span><br>      87-&gt;87:  <span style="background-color: white">        @Getter // for testing</span><br>      88-&gt;88:  <span style="background-color: white">        @RequiredArgsConstructor</span><br>       89-&gt;N:  <span style="background-color: white">        class ReceiverListener implements EventReceiverListener {</span><br>      90-&gt;90:  <span style="background-color: white">          private final EntityViewListener listener;</span><br>      91-&gt;91:  <span style="background-color: white">          private final CompletableFuture
+       <void>
+         future;
+       </void></span><br>       92-&gt;N:  <span style="background-color: white">      </span><br>      93-&gt;93:  <span style="background-color: white">          @Override</span><br>      94-&gt;94:  <span style="background-color: white">          public 
+       <k extends entity.key<s>
+        , S extends Specification&gt; void onEvent(Event
+        <k, s>
+          event) {
+        </k,>
+       </k></span><br>      95-&gt;95:  <span style="background-color: white">            if (!future.isDone() &amp;&amp; event == LOAD_COMPLETE) {</span><br>      96-&gt;96:  <span style="background-color: white">              future.complete(null);</span><br>       97-&gt;N:  <span style="background-color: white">            } else {</span><br>      98-&gt;98:  <span style="background-color: white">              val oldEntity = updater.update(event);</span><br>       99-&gt;N:  <span style="background-color: white">              if (future.isDone()) {</span><br>    100-&gt;100:  <span style="background-color: white">                listener.onEvent(oldEntity, event);</span><br>      101-&gt;N:  <span style="background-color: white">              }</span><br>      102-&gt;N:  <span style="background-color: white">            }</span><br>      103-&gt;N:  <span style="background-color: white">          }</span><br>      104-&gt;N:  <span style="background-color: white">        }</span><br>      105-&gt;N:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+  </div>  
+ </body>
+</html>

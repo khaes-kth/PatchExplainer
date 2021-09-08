@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <title>Execution Trace Diff</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <style>
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.test {
+    border: 1px solid darkblue;
+    padding-left: 10px;
+}
+</style> 
+ </head> 
+ <body> 
+  <div class="row test"> 
+   <h2>Differencing Test:</h2> <code> <pre>@Test <br>
+public void test_main(){ <br>
+    String ret = NumberAnalyzer.analyze(1); <br>
+    assertThat(ret, containsString("greater")); <br>
+}
+        </pre> </code> 
+  </div> 
+  <div class="row"> 
+   <div class="column"> 
+    <h2>Original Code:</h2> <code> <pre id="original-trace">           1:  <span style="background-color: white">      package com.deepoove.swagger.dubbo.config;</span><br>           2:  <span style="background-color: white">      </span><br>           3:  <span style="background-color: white">      import java.util.Map;</span><br>           4:  <span style="background-color: white">      import java.util.Set;</span><br>           5:  <span style="background-color: white">      </span><br>           6:  <span style="background-color: white">      import org.springframework.stereotype.Component;</span><br>           7:  <span style="background-color: white">      </span><br>           8:  <span style="background-color: white">      import com.deepoove.swagger.dubbo.http.ReferenceManager;</span><br>           9:  <span style="background-color: white">      </span><br>          10:  <span style="background-color: white">      import io.swagger.config.Scanner;</span><br>          11:  <span style="background-color: white">      </span><br>          12:  <span style="background-color: white">      @Component</span><br>          13:  <span style="background-color: white">      public class DubboServiceScanner implements Scanner {</span><br>          14:  <span style="background-color: white">      </span><br>          15:  <span style="background-color: white">      	@Override</span><br>          16:  <span style="background-color: white">      	public Set
+       <class>
+        <!--?-->&gt; classes() {
+       </class></span><br>          17:  <span style="background-color: white">      		return interfaceMapRef().keySet();</span><br>          18:  <span style="background-color: white">      	}</span><br>          19:  <span style="background-color: white">      	</span><br>          20:  <span style="background-color: white">      	public Map
+       <class>
+        <!--?-->, Object&gt; interfaceMapRef() {
+       </class></span><br>          21:  <span style="background-color: white">      		return ReferenceManager.getInstance().getInterfaceMapRef();</span><br>          22:  <span style="background-color: white">      	}</span><br>          23:  <span style="background-color: white">      </span><br>          24:  <span style="background-color: white">      	@Override</span><br>          25:  <span style="background-color: white">      	public boolean getPrettyPrint() {</span><br>          26:  <span style="background-color: white">      		return false;</span><br>          27:  <span style="background-color: white">      	}</span><br>          28:  <span style="background-color: white">      </span><br>          29:  <span style="background-color: white">      	@Override</span><br>          30:  <span style="background-color: white">      	public void setPrettyPrint(boolean shouldPrettyPrint) {</span><br>          31:  <span style="background-color: white">      	}</span><br>          32:  <span style="background-color: white">      </span><br>          33:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+   <div class="column"> 
+    <h2>Patched Code:</h2> <code> <pre id="patched-trace">        1-&gt;N:  <span style="background-color: white">      package com.deepoove.swagger.dubbo.config;</span><br>        2-&gt;N:  <span style="background-color: white">      </span><br>        3-&gt;N:  <span style="background-color: white">      import com.deepoove.swagger.dubbo.http.ReferenceManager;</span><br>        4-&gt;N:  <span style="background-color: white">      import io.swagger.config.Scanner;</span><br>        5-&gt;N:  <span style="background-color: white">      import org.springframework.stereotype.Component;</span><br>        6-&gt;N:  <span style="background-color: white">      </span><br>        7-&gt;N:  <span style="background-color: white">      import java.util.Map;</span><br>        8-&gt;N:  <span style="background-color: white">      import java.util.Set;</span><br>        9-&gt;N:  <span style="background-color: white">      </span><br>      10-&gt;12:  <span style="background-color: white">      @Component</span><br>       11-&gt;N:  <span style="background-color: white">      public class DubboServiceScanner implements Scanner {</span><br>       12-&gt;N:  <span style="background-color: white">      </span><br>      13-&gt;15:  <span style="background-color: white">          @Override</span><br>      14-&gt;16:  <span style="background-color: white">          public Set
+       <class>
+        <!--?-->&gt; classes() {
+       </class></span><br>       15-&gt;N:  <span style="background-color: white">              return interfaceMapRef().keySet();</span><br>       16-&gt;N:  <span style="background-color: white">          }</span><br>       17-&gt;N:  <span style="background-color: white">      </span><br>      18-&gt;20:  <span style="background-color: white">          public Map
+       <class>
+        <!--?-->, Object&gt; interfaceMapRef() {
+       </class></span><br>      19-&gt;21:  <span style="background-color: white">              return ReferenceManager.getInstance().getInterfaceMapRef();</span><br>       20-&gt;N:  <span style="background-color: white">          }</span><br>       21-&gt;N:  <span style="background-color: white">      </span><br>      22-&gt;24:  <span style="background-color: white">          @Override</span><br>      23-&gt;25:  <span style="background-color: white">          public boolean getPrettyPrint() {</span><br>      24-&gt;26:  <span style="background-color: white">              return false;</span><br>       25-&gt;N:  <span style="background-color: white">          }</span><br>       26-&gt;N:  <span style="background-color: white">      </span><br>      27-&gt;29:  <span style="background-color: white">          @Override</span><br>      28-&gt;30:  <span style="background-color: white">          public void setPrettyPrint(boolean shouldPrettyPrint) {</span><br>       29-&gt;N:  <span style="background-color: white">          }</span><br>       30-&gt;N:  <span style="background-color: white">      </span><br>       31-&gt;N:  <span style="background-color: white">      }</span><br></pre> </code> 
+   </div> 
+  </div>  
+ </body>
+</html>
