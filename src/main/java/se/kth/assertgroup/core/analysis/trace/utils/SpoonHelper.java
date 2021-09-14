@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 public class SpoonHelper {
-    public static LineMapping getDiff(File source, File target) throws Exception {
+    public static LineMapping getLineMapping(File source, File target) throws Exception {
         LineMapping res = new LineMapping();
 
 

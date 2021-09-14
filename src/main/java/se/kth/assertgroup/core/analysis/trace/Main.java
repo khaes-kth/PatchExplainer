@@ -7,7 +7,7 @@ public class Main {
         String originalPath = args[0], patchedPath = args[1], outputDir = args[2], targetFiles = args[3],
                 reportConfigStr = args[4];
 
-        new TraceAnalyzer(new File(originalPath), new File(patchedPath))
-                .generatedTraceDiff(new File(outputDir), targetFiles, reportConfigStr);
+//        new TraceAnalyzer(new File(originalPath), new File(patchedPath))
+//                .generateTraceDiffs(new File(outputDir), targetFiles, reportConfigStr);
     }
 }

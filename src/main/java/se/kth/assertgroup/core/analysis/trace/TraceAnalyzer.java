@@ -5,7 +5,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import se.kth.assertgroup.core.analysis.trace.models.ReportConfig;
+import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 import se.kth.assertgroup.core.analysis.trace.utils.CloverHelper;
+import se.kth.assertgroup.core.analysis.trace.utils.GHHelper;
 import se.kth.assertgroup.core.analysis.trace.utils.SpoonHelper;
 import se.kth.assertgroup.core.analysis.trace.models.LineMapping;
 
@@ -32,42 +34,83 @@ public class TraceAnalyzer {
     private static final String FINAL_REPORT_LINE_TEMPLATE = FINAL_REPORT_LINE_NUM_KEYWORD + ":  "
             + "<span style=\"background-color: " + FINAL_REPORT_COLOR_KEYWORD + "\">"
             + FINAL_REPORT_LINE_HIT_KEYWORD + "  " + FINAL_REPORT_CODE_KEYWORD + "</span>";
+    private static final String FINAL_GH_REPORT_FILENAME = "gh.html";
     private static final String INPUT_STR_SEPARATOR = ";";
     private static final String FINAL_REPORT_FILE_NAME_SEPARATOR = "-";
     private static final String JAVA_SUFFIX = ".java";
     private static final String HTML_SUFFIX = ".html";
     private static final int MAX_DEMONSTRABLE_HIT = 99;
 
-    private File originalMvnDir, patchedMvnDir;
+    public void generateTraceDiffsForGHCommit
+            (
+                    String slug,
+                    String commit,
+                    File originalMvnDir,
+                    File patchedMvnDir,
+                    File outputDir
+            ) throws Exception {
+        List<String> modifiedFiles =
+                GHHelper.cloneCommitAndGetChangedSources(slug, commit, originalMvnDir, patchedMvnDir);
+        TraceInfo traceInfo =
+                extractTraceInfo(originalMvnDir, patchedMvnDir, String.join(INPUT_STR_SEPARATOR, modifiedFiles));
 
-    public TraceAnalyzer(File originalMvnDir, File patchedMvnDir) {
-        this.originalMvnDir = originalMvnDir;
-        this.patchedMvnDir = patchedMvnDir;
+        outputDir.mkdirs();
+        File reportFile = outputDir.toPath().resolve(FINAL_REPORT_DIR_PATH).resolve(FINAL_GH_REPORT_FILENAME).toFile();
+        reportFile.createNewFile();
+
+        FileUtils.writeStringToFile(reportFile,
+                GHHelper.GHReportHTMLWithTraceData(slug, commit, traceInfo.getCoverageDiffs()),
+                "UTF-8");
     }
 
-    public void generatedTraceDiff(File outputDir, String modifiedFilePathsStr, String reportConfigsStr) throws Exception {
+    public void generateTraceDiffs
+            (
+                    File originalMvnDir,
+                    File patchedMvnDir,
+                    File outputDir,
+                    String modifiedFilePathsStr,
+                    String reportConfigsStr
+            ) throws Exception {
+        TraceInfo traceInfo = extractTraceInfo(originalMvnDir, patchedMvnDir, modifiedFilePathsStr);
+
+        List<String> modifiedFilePaths = Arrays.asList(modifiedFilePathsStr.split(INPUT_STR_SEPARATOR));
+
+        for (String path : modifiedFilePaths)
+            for (String configStr : reportConfigsStr.split(INPUT_STR_SEPARATOR))
+                outputTraceDiff(originalMvnDir, patchedMvnDir, outputDir, Path.of(path),
+                        traceInfo.getPathToLineMapping().get(path),
+                        traceInfo.getPathToOriginalCoverage().get(path),
+                        traceInfo.getPathToPatchedCoverage().get(path),
+                        new ReportConfig(configStr));
+    }
+
+    private TraceInfo extractTraceInfo
+            (
+                    File originalMvnDir,
+                    File patchedMvnDir,
+                    String modifiedFilePathsStr
+            ) throws Exception {
         if(modifiedFilePathsStr.isEmpty())
-            return;
+            return null;
 
         List<String> modifiedFilePaths = Arrays.asList(modifiedFilePathsStr.split(INPUT_STR_SEPARATOR));
         Map<String, LineMapping> filePathToLineMapping = new HashMap<>();
         for (String path : modifiedFilePaths)
-            filePathToLineMapping.put(path, SpoonHelper.getDiff(originalMvnDir.toPath().resolve(path).toFile(),
+            filePathToLineMapping.put(path, SpoonHelper.getLineMapping(originalMvnDir.toPath().resolve(path).toFile(),
                     patchedMvnDir.toPath().resolve(path).toFile()));
 
         Map<String, Map<Integer, Integer>> originalCoverages =
-                CloverHelper.getPerLineCoverage(originalMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
         Map<String, Map<Integer, Integer>> patchedCoverages =
-                CloverHelper.getPerLineCoverage(patchedMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
 
-        for (String path : modifiedFilePaths)
-            for (String configStr : reportConfigsStr.split(INPUT_STR_SEPARATOR))
-                generateTraceDiff(outputDir, Path.of(path), filePathToLineMapping.get(path),
-                        originalCoverages.get(path), patchedCoverages.get(path), new ReportConfig(configStr));
+        return new TraceInfo(filePathToLineMapping, originalCoverages, patchedCoverages);
     }
 
-    private void generateTraceDiff
+    private void outputTraceDiff
             (
+                    File originalMvnDir,
+                    File patchedMvnDir,
                     File outputDir,
                     Path modifiedFilePath,
                     LineMapping lineMapping,
@@ -165,25 +208,33 @@ public class TraceAnalyzer {
 //        File sample2 = new File("/home/khaes/phd/projects/explanation/code/tmp/jtar2");
 //        new TraceAnalyzer(sample1, sample2).generatedTraceDiff(sample2, Path.of("src/main/java/org/kamranzafar/jtar/TarHeader.java"));
 
-        File sample1 = new File("/home/khaes/phd/projects/explanation/code/tmp/swagger-dubbo2");
-        File sample2 = new File("/home/khaes/phd/projects/explanation/code/tmp/swagger-dubbo");
-        new TraceAnalyzer(sample1, sample2)
-                .generatedTraceDiff(sample2,
-                        "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/annotations/EnableDubboSwagger.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/DubboPropertyConfig.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/DubboServiceScanner.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/SwaggerDocCache.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/http/HttpMatch.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/http/ReferenceManager.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/DubboReaderExtension.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/NameDiscover.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/DubboReaderExtension.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/Reader.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/ReaderContext.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/ReaderExtension.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/DubboHttpController.java;" +
-                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/SwaggerDubboController.java;",
-                        "showHits-allColors;showHits;allColors; ");
+//        File sample1 = new File("/home/khaes/phd/projects/explanation/code/tmp/swagger-dubbo2");
+//        File sample2 = new File("/home/khaes/phd/projects/explanation/code/tmp/swagger-dubbo");
+//        new TraceAnalyzer()
+//                .generateTraceDiffs(sample1, sample2, sample2,
+//                        "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/annotations/EnableDubboSwagger.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/DubboPropertyConfig.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/DubboServiceScanner.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/config/SwaggerDocCache.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/http/HttpMatch.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/http/ReferenceManager.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/DubboReaderExtension.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/NameDiscover.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/DubboReaderExtension.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/Reader.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/ReaderContext.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/reader/ReaderExtension.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/DubboHttpController.java;" +
+//                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/SwaggerDubboController.java;",
+//                        "showHits-allColors;showHits;allColors; ");
+
+        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/original-tmp");
+        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp");
+        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp/target/trace");
+        new TraceAnalyzer()
+                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
+                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                        original, patched, outputDir);
 
     }
 }

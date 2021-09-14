@@ -18,7 +18,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +41,7 @@ public class CloverHelper {
     private static final String CLOVER_ID = "clover-maven-plugin";
     // End of MVN related keywords
 
-    public static Map<String, Map<Integer, Integer>> getPerLineCoverage
+    public static Map<String, Map<Integer, Integer>> getPerLineCoverages
             (
                     File projectDir,
                     List<String> modifiedFilePaths
@@ -81,15 +80,9 @@ public class CloverHelper {
     }
 
     private static void runMvnTest(File projectDir) throws Exception {
-        ProcessBuilder pb = new ProcessBuilder(
+        int exitVal = PH.run(projectDir, "Running maven....",
                 "sudo", "mvn", "clean", "clover:setup", "test", "-fn", "clover:aggregate", "clover:clover",
-                "-Dmaven.clover.reportDescriptor=" + CLOVER_TARGET_DESCRIPTOR_PATH
-        );
-        pb.inheritIO();
-        pb.directory(projectDir);
-        logger.info("Running maven....");
-        Process p = pb.start();
-        int exitVal = p.waitFor();
+                "-Dmaven.clover.reportDescriptor=" + CLOVER_TARGET_DESCRIPTOR_PATH);
         if (exitVal != 0)
             throw new Exception("Could not run mvn.");
     }
