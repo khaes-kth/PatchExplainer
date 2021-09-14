@@ -55,7 +55,7 @@ public class TraceAnalyzer {
                 extractTraceInfo(originalMvnDir, patchedMvnDir, String.join(INPUT_STR_SEPARATOR, modifiedFiles));
 
         outputDir.mkdirs();
-        File reportFile = outputDir.toPath().resolve(FINAL_REPORT_DIR_PATH).resolve(FINAL_GH_REPORT_FILENAME).toFile();
+        File reportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
         reportFile.createNewFile();
 
         FileUtils.writeStringToFile(reportFile,

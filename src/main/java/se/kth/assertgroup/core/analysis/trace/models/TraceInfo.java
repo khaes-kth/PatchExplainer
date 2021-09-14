@@ -13,26 +13,27 @@ public class TraceInfo {
                     Map<String, LineMapping> pathToLineMapping,
                     Map<String, Map<Integer, Integer>> pathToOriginalCoverage,
                     Map<String, Map<Integer, Integer>> pathToPatchedCoverage
-            ){
+            ) {
         this.pathToLineMapping = pathToLineMapping;
         this.pathToOriginalCoverage = pathToOriginalCoverage;
         this.pathToPatchedCoverage = pathToPatchedCoverage;
     }
 
     // returns map from file to a map of patched line number and execution time diff
-    public Map<String, Map<Integer, Integer>> getCoverageDiffs(){
+    public Map<String, Map<Integer, Integer>> getCoverageDiffs() {
         return pathToPatchedCoverage.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, fileCoverage ->
-                {
-                    String path = fileCoverage.getKey();
-                    return fileCoverage.getValue().entrySet().stream()
-                            .filter(lineCoverage -> pathToLineMapping.get(path).getDstToSrc().containsKey(lineCoverage.getKey())
-                                    && pathToOriginalCoverage.get(path)
-                                    .get(pathToLineMapping.get(path).getDstToSrc().containsKey(lineCoverage.getKey()))
-                                    != lineCoverage.getValue()).collect(Collectors.toMap(Map.Entry::getKey,
+        {
+            String path = fileCoverage.getKey();
+            return fileCoverage.getValue().entrySet().stream()
+                    .filter(lineCoverage -> pathToLineMapping.get(path).getDstToSrc().containsKey(lineCoverage.getKey())
+                            && pathToOriginalCoverage.get(path)
+                            .get(pathToLineMapping.get(path).getDstToSrc().get(lineCoverage.getKey()))
+                            != lineCoverage.getValue())
+                    .collect(Collectors.toMap(Map.Entry::getKey,
                             lineCoverage ->
                                     lineCoverage.getValue() - pathToOriginalCoverage.get(path)
-                                            .get(pathToLineMapping.get(path).getDstToSrc().containsKey(lineCoverage.getKey()))));
-                }));
+                                            .get(pathToLineMapping.get(path).getDstToSrc().get(lineCoverage.getKey()))));
+        }));
     }
 
     public Map<String, LineMapping> getPathToLineMapping() {

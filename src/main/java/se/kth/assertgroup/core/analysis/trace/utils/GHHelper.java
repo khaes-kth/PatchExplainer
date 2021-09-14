@@ -11,8 +11,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +28,7 @@ public class GHHelper {
 
     private static final String JAVA_FILE_EXTENSION = ".java";
     private static final String TEST_FILE_SUB_STR = "/test/";
+    private static final long SELENIUM_LOAD_WAIT_SEC = 3 * 1000L;
 
     public static List<String> cloneCommitAndGetChangedSources
             (
@@ -78,7 +77,6 @@ public class GHHelper {
                     String commit,
                     Map<String, Map<Integer, Integer>> coverageDiffs
             ) throws IOException {
-
         String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
 
         ChromeOptions options = new ChromeOptions();
@@ -86,6 +84,7 @@ public class GHHelper {
         WebDriver driver = new ChromeDriver(options);
         try {
             driver.get(commitUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
 
             // removing crossorigin attrs
             JavascriptExecutor jse = ((JavascriptExecutor) driver);
@@ -98,7 +97,7 @@ public class GHHelper {
             for (WebElement diffElem : diffElems) {
                 String path = diffElem.getAttribute("data-path");
                 if (!path.endsWith(".java") || path.contains("/test/")) {
-                    jse.executeAsyncScript(
+                    jse.executeScript(
                             "var diffElem = document.querySelector(\"div[data-path='" + path + "']\"); " +
                                     "diffElem.parentNode.parentNode.removeChild(diffElem.parentNode);");
                     continue;
@@ -131,6 +130,7 @@ public class GHHelper {
                         for (int lineNumber : coverageDiff.keySet()) {
                             if (lineNumber < right && lineNumber > lastRight) {
                                 expandableElem.click();
+                                Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
                                 isClicked = true;
                                 break;
                             }
@@ -140,12 +140,14 @@ public class GHHelper {
                             break;
                     }
 
-                    if(!isClicked)
+                    if (!isClicked)
                         break;
                 }
 
 
-                jse.executeAsyncScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
+                jse.executeScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
+                        ".forEach(e => e.classList.remove('blob-expanded'))");
+                System.out.println("Array.from(document.getElementsByClassName('blob-expanded'))" +
                         ".forEach(e => e.classList.remove('blob-expanded'))");
             }
 
@@ -154,19 +156,19 @@ public class GHHelper {
             for (WebElement diffElem : diffElems) {
                 String path = diffElem.getAttribute("data-path");
                 Map<Integer, Integer> coverageDiff = coverageDiffs.get(path);
-                final String covDiffJSMapStr = "";
+                final StringBuilder covDiffJSMapStr = new StringBuilder();
                 coverageDiff.entrySet().stream()
-                        .forEach(e -> covDiffJSMapStr.concat("[" + e.getKey() + "," + e.getValue() + "]"));
+                        .forEach(e -> covDiffJSMapStr.append((covDiffJSMapStr.toString().isEmpty() ? "" : ",") + "[" + e.getKey() + "," + e.getValue() + "]"));
 
-                jse.executeAsyncScript("var map2 = new Map([{covDiffMap}]);\n" +
+                String jsCmd = ("var covDiffMap = new Map([{covDiffMap}]);\n" +
                         "document.querySelector(\"div[data-path='src/main/java/NumberAnalyzer.java']\").parentNode.querySelectorAll(\"tr\").forEach(e => {\n" +
                         "\tvar added = false;\n" +
                         "\tvar tdElem = e.getElementsByTagName(\"td\")[1];\n" +
                         "\tvar rightLineNumberStr = tdElem.getAttribute(\"data-line-number\");\n" +
                         "\tif(rightLineNumberStr != null){\n" +
                         "\t\tvar rightLineNumber = parseInt(rightLineNumberStr)\n" +
-                        "\t\tvar covDiff = map2.get(parseInt(rightLineNumber));\n" +
-                        "\t\tif(map2.has(rightLineNumber)){\n" +
+                        "\t\tvar covDiff = covDiffMap.get(parseInt(rightLineNumber));\n" +
+                        "\t\tif(covDiffMap.has(rightLineNumber)){\n" +
                         "\t\t\tadded = true;\n" +
                         "\t\t\te.innerHTML += \"<td data-line-number=\\\"exec {exec-diff}\\\" style=\\\"background-color: {background-color};\\\" " +
                         "class=\\\"{classes}\\\"></td>\".replace(\"{exec-diff}\", covDiff > 0 ? \"+\" + covDiff : covDiff)" +
@@ -178,13 +180,16 @@ public class GHHelper {
                         "\t\tconsole.log(\"DIDDDD\");\n" +
                         "\t\te.innerHTML += \"<td class=\\\"{classes}\\\"></td>\".replace(\"{classes}\", tdElem.classList.toString());\n" +
                         "\t}\n" +
-                        "});".replace("{covDiffMap}", covDiffJSMapStr));
+                        "});").replace("{covDiffMap}", covDiffJSMapStr);
+                jse.executeScript(jsCmd);
+
+                System.out.println(jsCmd);
             }
 
         } finally {
+            String res = driver.getPageSource();
             driver.quit();
+            return res;
         }
-
-        return driver.getPageSource();
     }
 }
