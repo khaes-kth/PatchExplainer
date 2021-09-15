@@ -147,10 +147,7 @@ public class GHHelper {
 
                 jse.executeScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
                         ".forEach(e => e.classList.remove('blob-expanded'))");
-                System.out.println("Array.from(document.getElementsByClassName('blob-expanded'))" +
-                        ".forEach(e => e.classList.remove('blob-expanded'))");
             }
-
 
             // Adding coverage diff info
             for (WebElement diffElem : diffElems) {
@@ -168,10 +165,19 @@ public class GHHelper {
                         "\tif(rightLineNumberStr != null){\n" +
                         "\t\tvar rightLineNumber = parseInt(rightLineNumberStr)\n" +
                         "\t\tvar covDiff = covDiffMap.get(parseInt(rightLineNumber));\n" +
+                        "if(Math.abs(covDiff) > 10 ** 9){\n" +
+                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 9)) + \"G\";\n" +
+                        "\t\t} else if(Math.abs(covDiff) > 10 ** 6){\n" +
+                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 6)) + \"M\";\n" +
+                        "\t\t} else if(Math.abs(covDiff) > 10 ** 3){\n" +
+                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 3)) + \"K\";\n" +
+                        "\t\t} else{\n" +
+                        "\t\t\tcovDiffStr = covDiff;\n" +
+                        "\t\t}"+
                         "\t\tif(covDiffMap.has(rightLineNumber)){\n" +
                         "\t\t\tadded = true;\n" +
                         "\t\t\te.innerHTML += \"<td data-line-number=\\\"exec {exec-diff}\\\" style=\\\"background-color: {background-color};\\\" " +
-                        "class=\\\"{classes}\\\"></td>\".replace(\"{exec-diff}\", covDiff > 0 ? \"+\" + covDiff : covDiff)" +
+                        "class=\\\"{classes}\\\"></td>\".replace(\"{exec-diff}\", covDiff > 0 ? \"+\" + covDiffStr : covDiffStr)" +
                         ".replace(\"{background-color}\", covDiff > 0 ? \"#90EE90\" : \"#FF7F7F\")" +
                         ".replace(\"{classes}\", tdElem.classList.toString());\n" +
                         "\t\t}\n" +
@@ -182,8 +188,6 @@ public class GHHelper {
                         "\t}\n" +
                         "});").replace("{covDiffMap}", covDiffJSMapStr);
                 jse.executeScript(jsCmd);
-
-                System.out.println(jsCmd);
             }
 
         } finally {
