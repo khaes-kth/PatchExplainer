@@ -51,6 +51,9 @@ public class TraceAnalyzer {
             ) throws Exception {
         List<String> modifiedFiles =
                 GHHelper.cloneCommitAndGetChangedSources(slug, commit, originalMvnDir, patchedMvnDir);
+        if(modifiedFiles == null || modifiedFiles.isEmpty())
+            return;
+
         TraceInfo traceInfo =
                 extractTraceInfo(originalMvnDir, patchedMvnDir, String.join(INPUT_STR_SEPARATOR, modifiedFiles));
 
@@ -232,8 +235,8 @@ public class TraceAnalyzer {
         File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp");
         File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp/target/trace");
         new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                .generateTraceDiffsForGHCommit("kungfoo/geohash-java",
+                        "b221044db5545db202e6acf5d9737fcc297bf66e",
                         original, patched, outputDir);
 
     }

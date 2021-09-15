@@ -28,7 +28,7 @@ public class GHHelper {
 
     private static final String JAVA_FILE_EXTENSION = ".java";
     private static final String TEST_FILE_SUB_STR = "/test/";
-    private static final long SELENIUM_LOAD_WAIT_SEC = 3 * 1000L;
+    private static final long SELENIUM_LOAD_WAIT_SEC = 1000L;
 
     public static List<String> cloneCommitAndGetChangedSources
             (
@@ -158,7 +158,7 @@ public class GHHelper {
                         .forEach(e -> covDiffJSMapStr.append((covDiffJSMapStr.toString().isEmpty() ? "" : ",") + "[" + e.getKey() + "," + e.getValue() + "]"));
 
                 String jsCmd = ("var covDiffMap = new Map([{covDiffMap}]);\n" +
-                        "document.querySelector(\"div[data-path='src/main/java/NumberAnalyzer.java']\").parentNode.querySelectorAll(\"tr\").forEach(e => {\n" +
+                        "document.querySelector(\"div[data-path='{path}']\").parentNode.querySelectorAll(\"tr\").forEach(e => {\n" +
                         "\tvar added = false;\n" +
                         "\tvar tdElem = e.getElementsByTagName(\"td\")[1];\n" +
                         "\tvar rightLineNumberStr = tdElem.getAttribute(\"data-line-number\");\n" +
@@ -186,7 +186,7 @@ public class GHHelper {
                         "\t\tconsole.log(\"DIDDDD\");\n" +
                         "\t\te.innerHTML += \"<td class=\\\"{classes}\\\"></td>\".replace(\"{classes}\", tdElem.classList.toString());\n" +
                         "\t}\n" +
-                        "});").replace("{covDiffMap}", covDiffJSMapStr);
+                        "});").replace("{covDiffMap}", covDiffJSMapStr).replace("{path}", path);
                 jse.executeScript(jsCmd);
             }
 
