@@ -11,10 +11,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import se.kth.assertgroup.core.analysis.trace.models.GHReports;
+import se.kth.assertgroup.core.analysis.trace.models.LineMapping;
+import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,129 +75,210 @@ public class GHHelper {
         return modifiedSrcPaths;
     }
 
-    public static String GHReportHTMLWithTraceData
+    public static GHReports getGHReports
             (
                     String slug,
                     String commit,
-                    Map<String, Map<Integer, Integer>> coverageDiffs
-            ) throws IOException {
+                    List<String> modifiedFiles,
+                    Map<String, Map<Integer, Integer>> originalCoverages,
+                    Map<String, Map<Integer, Integer>> patchedCoverages,
+                    String linkToExpanded
+            ) {
+        String unexpandedHTML = null, expandedHTML = null;
+        boolean containsExecDiff = false;
+
         String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("headless");
-        WebDriver driver = new ChromeDriver(options);
+        WebDriver nonExpandingDriver = new ChromeDriver(options);
+        WebDriver expandingDriver = new ChromeDriver(options);
         try {
-            driver.get(commitUrl);
+            // adding trace data to both expanding and non-expanding versions
+            nonExpandingDriver.get(commitUrl);
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+            addTraceData(nonExpandingDriver, modifiedFiles, originalCoverages, patchedCoverages, false);
 
-            // removing crossorigin attrs
-            JavascriptExecutor jse = ((JavascriptExecutor) driver);
-            jse.executeScript("document.querySelectorAll('link,script')" +
-                    ".forEach(elem => {elem.removeAttribute('integrity'); elem.removeAttribute('crossorigin')})");
+            expandingDriver.get(commitUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+            containsExecDiff =
+                    addTraceData(expandingDriver, modifiedFiles, originalCoverages, patchedCoverages, true);
 
 
-            // clicking on needed expandable
-            List<WebElement> diffElems = driver.findElements(By.cssSelector("div[data-path]"));
-            for (WebElement diffElem : diffElems) {
-                String path = diffElem.getAttribute("data-path");
-                if (!path.endsWith(".java") || path.contains("/test/")) {
-                    jse.executeScript(
-                            "var diffElem = document.querySelector(\"div[data-path='" + path + "']\"); " +
-                                    "diffElem.parentNode.parentNode.removeChild(diffElem.parentNode);");
-                    continue;
-                }
+            // adding link to expanded version in the unexpanded version
+            unexpandedHTML = nonExpandingDriver.getPageSource();
+            expandedHTML = expandingDriver.getPageSource();
+            boolean showExpandWarning = expandedContainsExecDiff(nonExpandingDriver, expandingDriver);
+            addLinkToExpandedVersion(nonExpandingDriver, expandingDriver, linkToExpanded, showExpandWarning);
 
-                Map<Integer, Integer> coverageDiff = coverageDiffs.get(path);
 
+            // adding exec diff summary
+            addExecDiffSummary(nonExpandingDriver, expandingDriver);
+
+
+            unexpandedHTML = nonExpandingDriver.getPageSource();
+            expandedHTML = expandingDriver.getPageSource();
+        } catch (Exception e) {
+            throw new Exception("Could not get mappings from GH page.");
+        } finally {
+            nonExpandingDriver.quit();
+            expandingDriver.quit();
+
+            return new GHReports(expandedHTML, unexpandedHTML, containsExecDiff);
+        }
+    }
+
+    private static void addExecDiffSummary(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
+
+    }
+
+    // returns if there is some execution trace diff
+    private static boolean addTraceData
+            (
+                    WebDriver driver,
+                    List<String> modifiedFiles,
+                    Map<String, Map<Integer, Integer>> originalCoverages,
+                    Map<String, Map<Integer, Integer>> patchedCoverages,
+                    boolean expand
+            ) throws InterruptedException {
+        boolean containsExecDiff = false;
+
+        JavascriptExecutor jse = ((JavascriptExecutor) driver);
+
+
+        // adding data per modified source file
+        List<WebElement> diffElems = driver.findElements(By.cssSelector("div[data-path]"));
+        for (WebElement diffElem : diffElems) {
+            String path = diffElem.getAttribute("data-path");
+            Map<Integer, Integer> originalCoverage = originalCoverages.get(path),
+                    patchedCoverage = patchedCoverages.get(path);
+
+            if (!modifiedFiles.contains(path)) { // we only modify the diff for the modified files
+                continue;
+            }
+
+
+            if (expand) {
+                // clicking on needed expandable items
                 while (true) {
                     List<WebElement> expandableElems = driver.findElements(By.cssSelector("a.js-expand"));
-                    boolean isClicked = false;
-
-                    for (WebElement expandableElem : expandableElems) {
-                        String dataUrl = expandableElem.getAttribute("data-url");
-                        String[] urlParts = dataUrl.split("&");
-                        int right = -1, lastRight = -1;
-                        for (String urlPart : urlParts) {
-                            if (urlPart.startsWith("right=")) {
-                                String[] entryParts = urlPart.split("=");
-                                right = entryParts.length == 2 ? Integer.parseInt(entryParts[1]) : 0;
-                            }
-                            if (urlPart.startsWith("last_right=")) {
-                                String[] entryParts = urlPart.split("=");
-                                lastRight = entryParts.length == 2 ? Integer.parseInt(entryParts[1]) : 0;
-                            }
-                        }
-
-                        if (right < 0 || lastRight < 0) // invalid data
-                            continue;
-
-                        for (int lineNumber : coverageDiff.keySet()) {
-                            if (lineNumber < right && lineNumber > lastRight) {
-                                expandableElem.click();
-                                Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
-                                isClicked = true;
-                                break;
-                            }
-                        }
-
-                        if (isClicked)
-                            break;
-                    }
-
-                    if (!isClicked)
+                    if (expandableElems == null || expandableElems.isEmpty())
                         break;
+
+                    expandableElems.get(0).click();
+                    Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
                 }
 
 
+                // removing highlights for expanded lines
                 jse.executeScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
                         ".forEach(e => e.classList.remove('blob-expanded'))");
             }
 
-            // Adding coverage diff info
-            for (WebElement diffElem : diffElems) {
-                String path = diffElem.getAttribute("data-path");
-                Map<Integer, Integer> coverageDiff = coverageDiffs.get(path);
-                final StringBuilder covDiffJSMapStr = new StringBuilder();
-                coverageDiff.entrySet().stream()
-                        .forEach(e -> covDiffJSMapStr.append((covDiffJSMapStr.toString().isEmpty() ? "" : ",") + "[" + e.getKey() + "," + e.getValue() + "]"));
+            // Adding the exec info for the current file
+            boolean execHeaderAdded = false;
+            List<WebElement> lineElems = ((WebElement) jse.executeScript(
+                    "return arguments[0].parentNode;", diffElem)).findElements(By.tagName("tr"));
+            for (WebElement lineElem : lineElems) {
+                List<WebElement> colElems = lineElem.findElements(By.tagName("td"));
 
-                String jsCmd = ("var covDiffMap = new Map([{covDiffMap}]);\n" +
-                        "document.querySelector(\"div[data-path='{path}']\").parentNode.querySelectorAll(\"tr\").forEach(e => {\n" +
-                        "\tvar added = false;\n" +
-                        "\tvar tdElem = e.getElementsByTagName(\"td\")[1];\n" +
-                        "\tvar rightLineNumberStr = tdElem.getAttribute(\"data-line-number\");\n" +
-                        "\tif(rightLineNumberStr != null){\n" +
-                        "\t\tvar rightLineNumber = parseInt(rightLineNumberStr)\n" +
-                        "\t\tvar covDiff = covDiffMap.get(parseInt(rightLineNumber));\n" +
-                        "if(Math.abs(covDiff) > 10 ** 9){\n" +
-                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 9)) + \"G\";\n" +
-                        "\t\t} else if(Math.abs(covDiff) > 10 ** 6){\n" +
-                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 6)) + \"M\";\n" +
-                        "\t\t} else if(Math.abs(covDiff) > 10 ** 3){\n" +
-                        "\t\t\tcovDiffStr = Math.floor(covDiff / (10 ** 3)) + \"K\";\n" +
-                        "\t\t} else{\n" +
-                        "\t\t\tcovDiffStr = covDiff;\n" +
-                        "\t\t}"+
-                        "\t\tif(covDiffMap.has(rightLineNumber)){\n" +
-                        "\t\t\tadded = true;\n" +
-                        "\t\t\te.innerHTML += \"<td data-line-number=\\\"exec {exec-diff}\\\" style=\\\"background-color: {background-color};\\\" " +
-                        "class=\\\"{classes}\\\"></td>\".replace(\"{exec-diff}\", covDiff > 0 ? \"+\" + covDiffStr : covDiffStr)" +
-                        ".replace(\"{background-color}\", covDiff > 0 ? \"#90EE90\" : \"#FF7F7F\")" +
-                        ".replace(\"{classes}\", tdElem.classList.toString());\n" +
-                        "\t\t}\n" +
-                        "\t}\n" +
-                        "\tif(!added){\n" +
-                        "\t\tconsole.log(\"DIDDDD\");\n" +
-                        "\t\te.innerHTML += \"<td class=\\\"{classes}\\\"></td>\".replace(\"{classes}\", tdElem.classList.toString());\n" +
-                        "\t}\n" +
-                        "});").replace("{covDiffMap}", covDiffJSMapStr).replace("{path}", path);
-                jse.executeScript(jsCmd);
+                if (lineElem.getAttribute("class").contains("js-expandable-line")) { // its not a source line
+                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\">{exec-header}</td>\"")
+                                    .replace("{classes}", colElems.get(0).getAttribute("class"))
+                                    .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
+                            lineElem);
+                    execHeaderAdded = true;
+                    continue;
+                }
+
+                // extracting src and dst line numbers
+
+                String srcLineNumAttr = colElems.get(0).getAttribute("data-line-number"),
+                        dstLineNumAttr = colElems.get(1).getAttribute("data-line-number");
+
+                if ((srcLineNumAttr != null && !srcLineNumAttr.matches("-?\\d+")) ||
+                        (dstLineNumAttr != null && !dstLineNumAttr.matches("-?\\d+"))) {
+                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\">{exec-header}</td>\"")
+                                    .replace("{classes}", colElems.get(0).getAttribute("class"))
+                                    .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
+                            lineElem);
+                    execHeaderAdded = true;
+                    continue;
+                }
+
+
+                int srcLineNum = srcLineNumAttr == null ? -1 : Integer.parseInt(srcLineNumAttr),
+                        dstLineNum = dstLineNumAttr == null ? -1 : Integer.parseInt(dstLineNumAttr);
+
+
+                // computing exec-info
+                int dstExecCnt = patchedCoverage.containsKey(dstLineNum) ? patchedCoverage.get(dstLineNum) : -1,
+                        diffExecCnt = -1;
+                if (srcLineNum >= 0 && dstLineNum >= 0) {
+                    diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
+                            ? 0 : patchedCoverage.get(dstLineNum) - originalCoverage.get(srcLineNum);
+                    containsExecDiff = containsExecDiff || (diffExecCnt != 0);
+                }
+
+                String execInfo = getExecInfo(dstExecCnt, diffExecCnt, srcLineNum >= 0 && dstLineNum >= 0);
+
+
+                // adding exec-info
+                jse.executeScript(("arguments[0].innerHTML += \"<td no-empty-exec-info=\\\"{no-empty-exec-info}\\\" " +
+                                "data-line-number=\\\"{exec-info}\\\" " +
+                        "class=\\\"{classes}\\\"></td>\"").replace("{exec-info}", execInfo)
+                                .replace("{classes}", colElems.get(1).getAttribute("class"))
+                                .replace("{no-empty-exec-info}", !execInfo.isEmpty() + ""),
+                        lineElem);
             }
-
-        } finally {
-            String res = driver.getPageSource();
-            driver.quit();
-            return res;
         }
+
+        return containsExecDiff;
+    }
+
+    private static String getExecInfo(int dstExecCnt, int diffExecCnt, boolean includeDiffCnt) {
+        if(dstExecCnt < 0)
+            return "";
+
+        String dstExecStr = toHumanReadableStr(dstExecCnt);
+        if(!includeDiffCnt)
+            return dstExecStr;
+
+        String diffSign = diffExecCnt > 0 ? "+" : "", diffExecStr = toHumanReadableStr(diffExecCnt);
+        return dstExecStr + " (" + diffSign + diffExecStr + ")";
+    }
+
+    private static String toHumanReadableStr(int num) {
+        if(Math.abs(num) >= Math.pow(10, 6))
+            return (num / Math.pow(10, 6)) + "M";
+        else if(Math.abs(num) >= Math.pow(10, 3))
+            return (num / Math.pow(10, 3)) + "K";
+        return num + "";
+    }
+
+    private static void addLinkToExpandedVersion
+            (
+                    WebDriver nonExpandingDriver,
+                    WebDriver expandingDriver,
+                    String linkToExpanded,
+                    boolean showExpandWarning
+            ) {
+        ((JavascriptExecutor) nonExpandingDriver).executeScript(("var a = document.createElement('a');\n" +
+                "var linkText = document.createTextNode(\"See full diff\");\n" +
+                "a.appendChild(linkText);\n" +
+                "a.title = \"{title}\";\n" +
+                "a.href = \"{link-to-full}\";\n" +
+                "a.className = \"float-right ml-2\";\n" +
+                "var item = document.querySelector(\"div.ml-2\"); item.parentNode.replaceChild(a, item);")
+                .replace("{link-to-full}", linkToExpanded)
+                .replace("{title}", "There are " + (showExpandWarning ? "" : "no")
+                        + " execution trace diffs not visible on this page."));
+
+        ((JavascriptExecutor) expandingDriver).executeScript("document.querySelector(\"div.ml-2\").remove();");
+    }
+
+    private static boolean expandedContainsExecDiff(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
+        return nonExpandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size() !=
+                expandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size();
     }
 }

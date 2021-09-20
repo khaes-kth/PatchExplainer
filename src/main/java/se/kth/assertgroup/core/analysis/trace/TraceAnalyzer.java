@@ -4,6 +4,9 @@ import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import se.kth.assertgroup.core.analysis.trace.models.GHReports;
 import se.kth.assertgroup.core.analysis.trace.models.ReportConfig;
 import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 import se.kth.assertgroup.core.analysis.trace.utils.CloverHelper;
@@ -21,6 +24,7 @@ import java.util.*;
  * Given the original and patched mvn projects, a {@link TraceAnalyzer} generates the execution trace diff.
  */
 public class TraceAnalyzer {
+    private static final Logger logger = LoggerFactory.getLogger(TraceAnalyzer.class);
     private static final String FINAL_REPORT_TEMPLATE_PATH = "/trace/final_report.html";
     private static final String FINAL_REPORT_DIR_PATH = "target/trace/";
     private static final String FINAL_REPORT_ORIGINAL_COL_ID = "original-trace";
@@ -35,35 +39,52 @@ public class TraceAnalyzer {
             + "<span style=\"background-color: " + FINAL_REPORT_COLOR_KEYWORD + "\">"
             + FINAL_REPORT_LINE_HIT_KEYWORD + "  " + FINAL_REPORT_CODE_KEYWORD + "</span>";
     private static final String FINAL_GH_REPORT_FILENAME = "gh.html";
+    private static final String FINAL_EXPANDED_GH_REPORT_FILENAME = "gh_full.html";
     private static final String INPUT_STR_SEPARATOR = ";";
     private static final String FINAL_REPORT_FILE_NAME_SEPARATOR = "-";
     private static final String JAVA_SUFFIX = ".java";
     private static final String HTML_SUFFIX = ".html";
     private static final int MAX_DEMONSTRABLE_HIT = 99;
 
+
+    // does not use Spoon for line mapping, uses GH unified diff mapping instead
     public void generateTraceDiffsForGHCommit
             (
                     String slug,
                     String commit,
                     File originalMvnDir,
                     File patchedMvnDir,
-                    File outputDir
+                    File outputDir,
+                    String expandedVersionLink
             ) throws Exception {
-        List<String> modifiedFiles =
+        List<String> modifiedFilePaths =
                 GHHelper.cloneCommitAndGetChangedSources(slug, commit, originalMvnDir, patchedMvnDir);
-        if(modifiedFiles == null || modifiedFiles.isEmpty())
+        if(modifiedFilePaths == null || modifiedFilePaths.isEmpty()) {
+            logger.info("Nothing printed because no execution diff exists: " + slug + "/" + commit);
             return;
+        }
 
-        TraceInfo traceInfo =
-                extractTraceInfo(originalMvnDir, patchedMvnDir, String.join(INPUT_STR_SEPARATOR, modifiedFiles));
+        Map<String, Map<Integer, Integer>> originalCoverages =
+                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
+        Map<String, Map<Integer, Integer>> patchedCoverages =
+                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
+
+        GHReports ghReports =
+                GHHelper.getGHReports(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
+
+        if (!ghReports.containsExecDiff()) {
+            logger.info("Nothing printed because no execution diff exists: " + slug + "/" + commit);
+            return;
+        }
 
         outputDir.mkdirs();
-        File reportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
-        reportFile.createNewFile();
+        File unexpandedReportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
+        unexpandedReportFile.createNewFile();
+        File expandedReportFile = outputDir.toPath().resolve(FINAL_EXPANDED_GH_REPORT_FILENAME).toFile();
+        expandedReportFile.createNewFile();
 
-        FileUtils.writeStringToFile(reportFile,
-                GHHelper.GHReportHTMLWithTraceData(slug, commit, traceInfo.getCoverageDiffs()),
-                "UTF-8");
+        FileUtils.writeStringToFile(unexpandedReportFile, ghReports.getUnexpandedReport(), "UTF-8");
+        FileUtils.writeStringToFile(expandedReportFile, ghReports.getExpandedReport(), "UTF-8");
     }
 
     public void generateTraceDiffs
@@ -235,9 +256,9 @@ public class TraceAnalyzer {
         File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp");
         File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp/target/trace");
         new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("kungfoo/geohash-java",
-                        "b221044db5545db202e6acf5d9737fcc297bf66e",
-                        original, patched, outputDir);
+                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
+                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                        original, patched, outputDir, "http://example.com");
 
     }
 }
