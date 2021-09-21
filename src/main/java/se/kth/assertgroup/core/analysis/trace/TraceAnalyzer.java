@@ -24,7 +24,6 @@ import java.util.*;
  * Given the original and patched mvn projects, a {@link TraceAnalyzer} generates the execution trace diff.
  */
 public class TraceAnalyzer {
-    private static final Logger logger = LoggerFactory.getLogger(TraceAnalyzer.class);
     private static final String FINAL_REPORT_TEMPLATE_PATH = "/trace/final_report.html";
     private static final String FINAL_REPORT_DIR_PATH = "target/trace/";
     private static final String FINAL_REPORT_ORIGINAL_COL_ID = "original-trace";
@@ -60,7 +59,7 @@ public class TraceAnalyzer {
         List<String> modifiedFilePaths =
                 GHHelper.cloneCommitAndGetChangedSources(slug, commit, originalMvnDir, patchedMvnDir);
         if(modifiedFilePaths == null || modifiedFilePaths.isEmpty()) {
-            logger.info("Nothing printed because no execution diff exists: " + slug + "/" + commit);
+            System.out.println("Nothing printed because no execution diff exists: " + slug + "/" + commit);
             return;
         }
 
@@ -73,7 +72,7 @@ public class TraceAnalyzer {
                 GHHelper.getGHReports(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
 
         if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
-            logger.info("Nothing printed because no execution diff exists: " + slug + "/" + commit);
+            System.out.println("Nothing printed because no execution diff exists: " + slug + "/" + commit);
             return;
         }
 
@@ -252,17 +251,17 @@ public class TraceAnalyzer {
 //                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/SwaggerDubboController.java;",
 //                        "showHits-allColors;showHits;allColors; ");
 
-        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/original-tmp");
-        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp");
-        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp/target/trace");
-        new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("ozzi-/JWT4B",
-                        "c1e61531a6f4854eda7b9d8a324c10fc861380db",
-                        original, patched, outputDir, "http://example.com");
+        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/original-tmp2");
+        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp2");
+        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp2/target/trace");
 //        new TraceAnalyzer()
-//                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-//                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+//                .generateTraceDiffsForGHCommit("brianfrankcooper/YCSB",
+//                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
 //                        original, patched, outputDir, "http://example.com");
+        new TraceAnalyzer()
+                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
+                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                        original, patched, outputDir, "http://example.com");
 
     }
 }

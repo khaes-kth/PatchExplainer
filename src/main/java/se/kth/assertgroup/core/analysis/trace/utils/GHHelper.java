@@ -110,10 +110,6 @@ public class GHHelper {
             addLinkToExpandedVersion(nonExpandingDriver, expandingDriver, linkToExpanded, showExpandWarning);
 
 
-            // adding exec diff summary
-            addExecDiffSummary(nonExpandingDriver, expandingDriver, reportSummary);
-
-
             unexpandedHTML = nonExpandingDriver.getPageSource();
             expandedHTML = expandingDriver.getPageSource();
         } catch (Exception e) {
@@ -128,8 +124,8 @@ public class GHHelper {
 
     private static void addExecDiffSummary
             (
-                    WebDriver nonExpandingDriver,
-                    WebDriver expandingDriver,
+                    WebDriver driver,
+                    WebElement diffElem,
                     GHReports.ReportSummary summary
             ) {
         int redSlots = summary.getLinesWithFewerExec() > 0 ? 1 : 0,
@@ -160,12 +156,9 @@ public class GHHelper {
                 .replace("{total-changed}",
                         (summary.getLinesWithFewerExec() + summary.getLinesWithMoreExec()) + "");
 
-        ((JavascriptExecutor) nonExpandingDriver)
-                .executeScript(("document.querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
-                        .replace("{new-html}", summaryHTML));
-        ((JavascriptExecutor) expandingDriver)
-                .executeScript(("document.querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
-                        .replace("{new-html}", summaryHTML));
+        ((JavascriptExecutor) driver)
+                .executeScript(("arguments[0].querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
+                        .replace("{new-html}", summaryHTML), diffElem);
     }
 
     // returns if there is some execution trace diff
@@ -177,7 +170,7 @@ public class GHHelper {
             Map<String, Map<Integer, Integer>> patchedCoverages,
             boolean expand
     ) throws InterruptedException {
-        int linesWithMoreExec = 0, linesWithFewerExec = 0, linesWithEqualExec = 0;
+        int totalLinesWithMoreExec = 0, totalLinesWithFewerExec = 0, totalLinesWithEqualExec = 0;
 
         JavascriptExecutor jse = ((JavascriptExecutor) driver);
 
@@ -212,6 +205,7 @@ public class GHHelper {
             }
 
             // Adding the exec info for the current file
+            int currentLinesWithMoreExec = 0, currentLinesWithFewerExec = 0, currentLinesWithEqualExec = 0;
             boolean execHeaderAdded = false;
             List<WebElement> lineElems = ((WebElement) jse.executeScript(
                     "return arguments[0].parentNode;", diffElem)).findElements(By.tagName("tr"));
@@ -259,13 +253,12 @@ public class GHHelper {
                 if (srcLineNum >= 0 && dstLineNum >= 0) {
                     diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
                             ? 0 : patchedCoverage.get(dstLineNum) - originalCoverage.get(srcLineNum);
-                    linesWithMoreExec += diffExecCnt > 0 ? 1 : 0;
-                    linesWithEqualExec += diffExecCnt == 0 ? 1 : 0;
-                    linesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
+                    currentLinesWithMoreExec += diffExecCnt > 0 ? 1 : 0;
+                    currentLinesWithEqualExec += diffExecCnt == 0 ? 1 : 0;
+                    currentLinesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
                 }
 
                 String execInfo = getExecInfo(dstExecCnt, diffExecCnt, srcLineNum >= 0 && dstLineNum >= 0);
-
 
                 // adding exec-info
                 jse.executeScript(("arguments[0].innerHTML += \"<td no-empty-exec-info=\\\"{no-empty-exec-info}\\\" " +
@@ -278,9 +271,16 @@ public class GHHelper {
                                 .replace("{no-empty-exec-info}", !execInfo.isEmpty() + ""),
                         lineElem);
             }
+            totalLinesWithMoreExec += currentLinesWithMoreExec;
+            totalLinesWithFewerExec += currentLinesWithFewerExec;
+            totalLinesWithEqualExec += currentLinesWithEqualExec;
+
+            // adding summary info
+            addExecDiffSummary(driver, diffElem, new GHReports.ReportSummary(currentLinesWithMoreExec,
+                    currentLinesWithFewerExec, currentLinesWithEqualExec));
         }
 
-        return new GHReports.ReportSummary(linesWithMoreExec, linesWithFewerExec, linesWithEqualExec);
+        return new GHReports.ReportSummary(totalLinesWithMoreExec, totalLinesWithFewerExec, totalLinesWithEqualExec);
     }
 
     private static String getExecInfo(int dstExecCnt, int diffExecCnt, boolean includeDiffCnt) {
