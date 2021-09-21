@@ -72,7 +72,7 @@ public class TraceAnalyzer {
         GHReports ghReports =
                 GHHelper.getGHReports(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
 
-        if (!ghReports.containsExecDiff()) {
+        if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
             logger.info("Nothing printed because no execution diff exists: " + slug + "/" + commit);
             return;
         }
@@ -256,9 +256,13 @@ public class TraceAnalyzer {
         File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp");
         File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp/target/trace");
         new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                .generateTraceDiffsForGHCommit("ozzi-/JWT4B",
+                        "c1e61531a6f4854eda7b9d8a324c10fc861380db",
                         original, patched, outputDir, "http://example.com");
+//        new TraceAnalyzer()
+//                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
+//                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+//                        original, patched, outputDir, "http://example.com");
 
     }
 }

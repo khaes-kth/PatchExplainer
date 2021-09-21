@@ -1,6 +1,7 @@
 package se.kth.assertgroup.core.analysis.trace.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,10 +18,7 @@ import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GHHelper {
     private static final String GH_COMMIT_KEYWORD = "{commit}";
@@ -85,7 +83,7 @@ public class GHHelper {
                     String linkToExpanded
             ) {
         String unexpandedHTML = null, expandedHTML = null;
-        boolean containsExecDiff = false;
+        GHReports.ReportSummary reportSummary = null;
 
         String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
 
@@ -101,7 +99,7 @@ public class GHHelper {
 
             expandingDriver.get(commitUrl);
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
-            containsExecDiff =
+            reportSummary =
                     addTraceData(expandingDriver, modifiedFiles, originalCoverages, patchedCoverages, true);
 
 
@@ -113,7 +111,7 @@ public class GHHelper {
 
 
             // adding exec diff summary
-            addExecDiffSummary(nonExpandingDriver, expandingDriver);
+            addExecDiffSummary(nonExpandingDriver, expandingDriver, reportSummary);
 
 
             unexpandedHTML = nonExpandingDriver.getPageSource();
@@ -124,24 +122,62 @@ public class GHHelper {
             nonExpandingDriver.quit();
             expandingDriver.quit();
 
-            return new GHReports(expandedHTML, unexpandedHTML, containsExecDiff);
+            return new GHReports(expandedHTML, unexpandedHTML, reportSummary);
         }
     }
 
-    private static void addExecDiffSummary(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
+    private static void addExecDiffSummary
+            (
+                    WebDriver nonExpandingDriver,
+                    WebDriver expandingDriver,
+                    GHReports.ReportSummary summary
+            ) {
+        int redSlots = summary.getLinesWithFewerExec() > 0 ? 1 : 0,
+                greenSlots = summary.getLinesWithMoreExec() > 0 ? 1 : 0,
+                graySlots = summary.getLinesWithEqualExec() > 0 ? 1 : 0;
 
+        if (summary.getLinesWithMoreExec() < summary.getLinesWithFewerExec())
+            redSlots = 5 - greenSlots - graySlots;
+        else if (summary.getLinesWithFewerExec() < summary.getLinesWithMoreExec())
+            greenSlots = 5 - redSlots - graySlots;
+        else {
+            redSlots = greenSlots = 2;
+            graySlots = 1;
+        }
+
+        List<String> summaryLabelClasses = new ArrayList<>();
+        summaryLabelClasses.addAll(Collections.nCopies(redSlots, "<span class=\\\"diffstat-block-deleted\\\"></span>"));
+        summaryLabelClasses.addAll(Collections.nCopies(greenSlots, "<span class=\\\"diffstat-block-added\\\"></span>"));
+        summaryLabelClasses.addAll(Collections.nCopies(graySlots, "<span class=\\\"diffstat-block-neutral\\\"></span>"));
+
+        String summaryHTML = ("<span class=\\\"diffstat tooltipped tooltipped-e\\\" aria-label=\\\"{more-exec} lines executed " +
+                "more &amp; {fewer-exec} lines executed fewer times.\\\"><span style=\\\"margin-right: 5px\\\">EXEC-DIFF: {total-changed}</span>" +
+                "{spans}</span>")
+                .replace("{more-exec}", summary.getLinesWithMoreExec() + "")
+                .replace("{fewer-exec}", summary.getLinesWithFewerExec() + "")
+                .replace("{equal-exec}", summary.getLinesWithEqualExec() + "")
+                .replace("{spans}", StringUtils.join(summaryLabelClasses, ""))
+                .replace("{total-changed}",
+                        (summary.getLinesWithFewerExec() + summary.getLinesWithMoreExec()) + "");
+
+        ((JavascriptExecutor) nonExpandingDriver)
+                .executeScript(("document.querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
+                        .replace("{new-html}", summaryHTML));
+        ((JavascriptExecutor) expandingDriver)
+                .executeScript(("document.querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
+                        .replace("{new-html}", summaryHTML));
     }
 
     // returns if there is some execution trace diff
-    private static boolean addTraceData
-            (
-                    WebDriver driver,
-                    List<String> modifiedFiles,
-                    Map<String, Map<Integer, Integer>> originalCoverages,
-                    Map<String, Map<Integer, Integer>> patchedCoverages,
-                    boolean expand
-            ) throws InterruptedException {
-        boolean containsExecDiff = false;
+    private static GHReports.ReportSummary addTraceData
+    (
+            WebDriver driver,
+            List<String> modifiedFiles,
+            Map<String, Map<Integer, Integer>> originalCoverages,
+            Map<String, Map<Integer, Integer>> patchedCoverages,
+            boolean expand
+    ) throws InterruptedException {
+        int linesWithMoreExec = 0, linesWithFewerExec = 0, linesWithEqualExec = 0;
 
         JavascriptExecutor jse = ((JavascriptExecutor) driver);
 
@@ -183,7 +219,10 @@ public class GHHelper {
                 List<WebElement> colElems = lineElem.findElements(By.tagName("td"));
 
                 if (lineElem.getAttribute("class").contains("js-expandable-line")) { // its not a source line
-                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\">{exec-header}</td>\"")
+                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\" " +
+                                    "style=\\\"text-align: center\\\">{exec-header}</td>\";" +
+                                    "var lastChildInd = arguments[0].childNodes.length - 1;" +
+                                    "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
                                     .replace("{classes}", colElems.get(0).getAttribute("class"))
                                     .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
                             lineElem);
@@ -198,7 +237,10 @@ public class GHHelper {
 
                 if ((srcLineNumAttr != null && !srcLineNumAttr.matches("-?\\d+")) ||
                         (dstLineNumAttr != null && !dstLineNumAttr.matches("-?\\d+"))) {
-                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\">{exec-header}</td>\"")
+                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\" " +
+                                    "style=\\\"text-align: center\\\">{exec-header}</td>\";" +
+                                    "var lastChildInd = arguments[0].childNodes.length - 1;" +
+                                    "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
                                     .replace("{classes}", colElems.get(0).getAttribute("class"))
                                     .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
                             lineElem);
@@ -217,7 +259,9 @@ public class GHHelper {
                 if (srcLineNum >= 0 && dstLineNum >= 0) {
                     diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
                             ? 0 : patchedCoverage.get(dstLineNum) - originalCoverage.get(srcLineNum);
-                    containsExecDiff = containsExecDiff || (diffExecCnt != 0);
+                    linesWithMoreExec += diffExecCnt > 0 ? 1 : 0;
+                    linesWithEqualExec += diffExecCnt == 0 ? 1 : 0;
+                    linesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
                 }
 
                 String execInfo = getExecInfo(dstExecCnt, diffExecCnt, srcLineNum >= 0 && dstLineNum >= 0);
@@ -226,33 +270,37 @@ public class GHHelper {
                 // adding exec-info
                 jse.executeScript(("arguments[0].innerHTML += \"<td no-empty-exec-info=\\\"{no-empty-exec-info}\\\" " +
                                 "data-line-number=\\\"{exec-info}\\\" " +
-                        "class=\\\"{classes}\\\"></td>\"").replace("{exec-info}", execInfo)
+                                "class=\\\"{classes}\\\"></td>\";" +
+                                "var lastChildInd = arguments[0].childNodes.length - 1;" +
+                                "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
+                                .replace("{exec-info}", execInfo)
                                 .replace("{classes}", colElems.get(1).getAttribute("class"))
                                 .replace("{no-empty-exec-info}", !execInfo.isEmpty() + ""),
                         lineElem);
             }
         }
 
-        return containsExecDiff;
+        return new GHReports.ReportSummary(linesWithMoreExec, linesWithFewerExec, linesWithEqualExec);
     }
 
     private static String getExecInfo(int dstExecCnt, int diffExecCnt, boolean includeDiffCnt) {
-        if(dstExecCnt < 0)
+        if (dstExecCnt < 0)
             return "";
 
         String dstExecStr = toHumanReadableStr(dstExecCnt);
-        if(!includeDiffCnt)
+        if (!includeDiffCnt)
             return dstExecStr;
 
-        String diffSign = diffExecCnt > 0 ? "+" : "", diffExecStr = toHumanReadableStr(diffExecCnt);
-        return dstExecStr + " (" + diffSign + diffExecStr + ")";
+        String diffSign = diffExecCnt > 0 ? "+" : "", diffCntStr = toHumanReadableStr(diffExecCnt),
+                diffFullStr = "(" + diffSign + diffCntStr + ")";
+        return dstExecStr + "&nbsp;".repeat(11 - dstExecStr.length() - diffFullStr.length()) + diffFullStr;
     }
 
     private static String toHumanReadableStr(int num) {
-        if(Math.abs(num) >= Math.pow(10, 6))
-            return (num / Math.pow(10, 6)) + "M";
-        else if(Math.abs(num) >= Math.pow(10, 3))
-            return (num / Math.pow(10, 3)) + "K";
+        if (Math.abs(num) >= Math.pow(10, 6))
+            return (int) (num / Math.pow(10, 6)) + "M";
+        else if (Math.abs(num) >= Math.pow(10, 3))
+            return (int)(num / Math.pow(10, 3)) + "K";
         return num + "";
     }
 
