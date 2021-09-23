@@ -60,17 +60,24 @@ public class GHHelper {
 
 
         List<String> modifiedSrcPaths = new ArrayList<>();
+
         String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
-        Document doc = Jsoup.connect(commitUrl).get();
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
+        WebDriver driver = new ChromeDriver(options);
+        try {
+            driver.get(commitUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
 
-        Elements changedFileElems = doc.select("a.Link--primary");
-        for (Element changedFileElem : changedFileElems) {
-            String filePath = changedFileElem.text();
-            if (filePath != null && filePath.endsWith(JAVA_FILE_EXTENSION) && !filePath.contains(TEST_FILE_SUB_STR))
-                modifiedSrcPaths.add(filePath);
+            List<WebElement> changedFileElems = driver.findElements(By.cssSelector("a.Link--primary"));
+            for (WebElement changedFileElem : changedFileElems) {
+                String filePath = changedFileElem.getText();
+                if (filePath != null && filePath.endsWith(JAVA_FILE_EXTENSION))
+                    modifiedSrcPaths.add(filePath);
+            }
+        } finally {
+            return modifiedSrcPaths;
         }
-
-        return modifiedSrcPaths;
     }
 
     public static GHReports getGHReports
@@ -249,16 +256,17 @@ public class GHHelper {
 
                 // computing exec-info
                 int dstExecCnt = patchedCoverage.containsKey(dstLineNum) ? patchedCoverage.get(dstLineNum) : -1,
-                        diffExecCnt = -1;
+                        srcExecCnt = originalCoverage.containsKey(srcLineNum)
+                                ? originalCoverage.get(srcLineNum) : -1;
                 if (srcLineNum >= 0 && dstLineNum >= 0) {
-                    diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
+                    int diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
                             ? 0 : patchedCoverage.get(dstLineNum) - originalCoverage.get(srcLineNum);
                     currentLinesWithMoreExec += diffExecCnt > 0 ? 1 : 0;
                     currentLinesWithEqualExec += diffExecCnt == 0 ? 1 : 0;
                     currentLinesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
                 }
 
-                String execInfo = getExecInfo(dstExecCnt, diffExecCnt, srcLineNum >= 0 && dstLineNum >= 0);
+                String execInfo = getExecInfo(srcExecCnt, dstExecCnt);
 
                 // adding exec-info
                 jse.executeScript(("arguments[0].innerHTML += \"<td no-empty-exec-info=\\\"{no-empty-exec-info}\\\" " +
@@ -283,24 +291,29 @@ public class GHHelper {
         return new GHReports.ReportSummary(totalLinesWithMoreExec, totalLinesWithFewerExec, totalLinesWithEqualExec);
     }
 
-    private static String getExecInfo(int dstExecCnt, int diffExecCnt, boolean includeDiffCnt) {
-        if (dstExecCnt < 0)
-            return "";
+    private static String getExecInfo(int srcExecCnt, int dstExecCnt) {
+        String leftCol = "", rightCol = "";
 
-        String dstExecStr = toHumanReadableStr(dstExecCnt);
-        if (!includeDiffCnt)
-            return dstExecStr;
+        if (dstExecCnt < 0) {
+            if (!(srcExecCnt < 0))
+                leftCol = toHumanReadableStr(srcExecCnt);
+        } else {
+            rightCol = toHumanReadableStr(dstExecCnt);
 
-        String diffSign = diffExecCnt > 0 ? "+" : "", diffCntStr = toHumanReadableStr(diffExecCnt),
-                diffFullStr = "(" + diffSign + diffCntStr + ")";
-        return dstExecStr + "&nbsp;".repeat(11 - dstExecStr.length() - diffFullStr.length()) + diffFullStr;
+            if (!(srcExecCnt < 0)) {
+                int diffExecCnt = dstExecCnt - srcExecCnt;
+                leftCol = "(" + (diffExecCnt > 0 ? "+" : "") + toHumanReadableStr(diffExecCnt) + ")";
+            }
+        }
+
+        return leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
     }
 
     private static String toHumanReadableStr(int num) {
         if (Math.abs(num) >= Math.pow(10, 6))
             return (int) (num / Math.pow(10, 6)) + "M";
         else if (Math.abs(num) >= Math.pow(10, 3))
-            return (int)(num / Math.pow(10, 3)) + "K";
+            return (int) (num / Math.pow(10, 3)) + "K";
         return num + "";
     }
 

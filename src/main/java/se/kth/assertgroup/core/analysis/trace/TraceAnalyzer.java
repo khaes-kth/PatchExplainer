@@ -259,8 +259,8 @@ public class TraceAnalyzer {
 //                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
 //                        original, patched, outputDir, "http://example.com");
         new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                .generateTraceDiffsForGHCommit("kungfoo/geohash-java",
+                        "b221044db5545db202e6acf5d9737fcc297bf66e",
                         original, patched, outputDir, "http://example.com");
 
     }
