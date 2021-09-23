@@ -2,10 +2,6 @@ package se.kth.assertgroup.core.analysis.trace.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -13,11 +9,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import se.kth.assertgroup.core.analysis.trace.models.GHReports;
-import se.kth.assertgroup.core.analysis.trace.models.LineMapping;
-import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class GHHelper {
@@ -266,17 +259,19 @@ public class GHHelper {
                     currentLinesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
                 }
 
-                String execInfo = getExecInfo(srcExecCnt, dstExecCnt);
+                ExecInfo execInfo = getExecInfo(srcExecCnt, dstExecCnt);
 
                 // adding exec-info
-                jse.executeScript(("arguments[0].innerHTML += \"<td no-empty-exec-info=\\\"{no-empty-exec-info}\\\" " +
-                                "data-line-number=\\\"{exec-info}\\\" " +
+                jse.executeScript(("arguments[0].innerHTML += \"<td {title-info} no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
+                                "data-line-number=\\\"{exec-info-label}\\\" " +
                                 "class=\\\"{classes}\\\"></td>\";" +
                                 "var lastChildInd = arguments[0].childNodes.length - 1;" +
                                 "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
-                                .replace("{exec-info}", execInfo)
+                                .replace("{exec-info-label}", execInfo.getLabel())
+                                .replace("{title-info}", "title=\\\"" + execInfo.getTooltip() + "\\\"")
                                 .replace("{classes}", colElems.get(1).getAttribute("class"))
-                                .replace("{no-empty-exec-info}", !execInfo.isEmpty() + ""),
+                                .replace("{contains-exec-diff}",
+                                        ((currentLinesWithFewerExec + currentLinesWithFewerExec) != 0) + ""),
                         lineElem);
             }
             totalLinesWithMoreExec += currentLinesWithMoreExec;
@@ -291,7 +286,8 @@ public class GHHelper {
         return new GHReports.ReportSummary(totalLinesWithMoreExec, totalLinesWithFewerExec, totalLinesWithEqualExec);
     }
 
-    private static String getExecInfo(int srcExecCnt, int dstExecCnt) {
+    private static ExecInfo getExecInfo(int srcExecCnt, int dstExecCnt) {
+        // creating the label
         String leftCol = "", rightCol = "";
 
         if (dstExecCnt < 0) {
@@ -306,7 +302,23 @@ public class GHHelper {
             }
         }
 
-        return leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
+        String label = leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
+
+
+        // creating the tooltip
+        String tooltip = null;
+        if(dstExecCnt < 0) {
+            if (!(srcExecCnt < 0))
+                tooltip = srcExecCnt + " execution(s) in original version";
+        }else {
+            if (srcExecCnt < 0)
+                tooltip = dstExecCnt + " execution(s)  in the patched version";
+            else
+                tooltip = dstExecCnt + " execution(s) in the patched, " +
+                        ((srcExecCnt != dstExecCnt) ? (leftCol + " compared to the original.")
+                                : "no change compared to the original.");
+        }
+        return new ExecInfo(label, tooltip);
     }
 
     private static String toHumanReadableStr(int num) {
@@ -339,7 +351,32 @@ public class GHHelper {
     }
 
     private static boolean expandedContainsExecDiff(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
-        return nonExpandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size() !=
-                expandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size();
+        return nonExpandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size() !=
+                expandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size();
+    }
+
+    private static class ExecInfo{
+        private String label, tooltip;
+
+        public ExecInfo(String label, String tooltip){
+            this.label = label;
+            this.tooltip = tooltip;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public String getTooltip() {
+            return tooltip;
+        }
+
+        public void setTooltip(String tooltip) {
+            this.tooltip = tooltip;
+        }
     }
 }
