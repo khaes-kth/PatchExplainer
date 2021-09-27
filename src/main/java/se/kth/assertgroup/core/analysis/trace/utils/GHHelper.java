@@ -177,14 +177,28 @@ public class GHHelper {
 
         // adding data per modified source file
         List<WebElement> diffElems = driver.findElements(By.cssSelector("div[data-path]"));
+        int cnt = 0;
         for (WebElement diffElem : diffElems) {
             String path = diffElem.getAttribute("data-path");
+            cnt++;
             Map<Integer, Integer> originalCoverage = originalCoverages.get(path),
                     patchedCoverage = patchedCoverages.get(path);
 
             if (!modifiedFiles.contains(path)) { // we only modify the diff for the modified files
                 continue;
             }
+
+
+            // adding new column for exec info
+            WebElement scrollableDiv = (WebElement)
+                    jse.executeScript("return arguments[0].parentNode.querySelector(\"[style='overflow-x: auto']\")", diffElem);
+            String execColId = "exec-col-" + cnt;
+            jse.executeScript("arguments[0].parentNode.innerHTML =" +
+                    "\"<div id=\\\"{execColId}\\\" style=\\\"float: right; width: 100px%;\\\"></div>\" + arguments[0].parentNode.innerHTML"
+                            .replace("{execColId}", execColId), scrollableDiv); // adding exec-col-div
+            scrollableDiv = (WebElement)
+                    jse.executeScript("return arguments[0].parentNode.querySelector(\"[style='overflow-x: auto']\")", diffElem);
+            jse.executeScript("arguments[0].parentNode.innerHTML+=\"<div style=\\\"clear: both\\\"></div>\"", scrollableDiv);
 
 
             if (expand) {
@@ -213,13 +227,11 @@ public class GHHelper {
                 List<WebElement> colElems = lineElem.findElements(By.tagName("td"));
 
                 if (lineElem.getAttribute("class").contains("js-expandable-line")) { // its not a source line
-                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\" " +
-                                    "style=\\\"text-align: center\\\">{exec-header}</td>\";" +
-                                    "var lastChildInd = arguments[0].childNodes.length - 1;" +
-                                    "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
-                                    .replace("{classes}", colElems.get(0).getAttribute("class"))
-                                    .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
-                            lineElem);
+                    jse.executeScript(("document.querySelector('#{exec-col-id}').innerHTML += \"<div class=\\\"blob-num\\\" " +
+                            "style=\\\"height: {height}px; width: 100%; text-align: center\\\">{exec-header}</div>\";")
+                            .replace("{height}", lineElem.getSize().getHeight() + "")
+                            .replace("{exec-col-id}", execColId)
+                            .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""));
                     execHeaderAdded = true;
                     continue;
                 }
@@ -231,13 +243,11 @@ public class GHHelper {
 
                 if ((srcLineNumAttr != null && !srcLineNumAttr.matches("-?\\d+")) ||
                         (dstLineNumAttr != null && !dstLineNumAttr.matches("-?\\d+"))) {
-                    jse.executeScript(("arguments[0].innerHTML += \"<td class=\\\"{classes}\\\" " +
-                                    "style=\\\"text-align: center\\\">{exec-header}</td>\";" +
-                                    "var lastChildInd = arguments[0].childNodes.length - 1;" +
-                                    "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
-                                    .replace("{classes}", colElems.get(0).getAttribute("class"))
-                                    .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
-                            lineElem);
+                    jse.executeScript(("document.querySelector('#{exec-col-id}').innerHTML += \"<div class=\\\"blob-num\\\" " +
+                            "style=\\\"height: {height}px; width: 100%; text-align: center\\\">{exec-header}</div>\";")
+                            .replace("{height}", lineElem.getSize().getHeight() + "")
+                            .replace("{exec-col-id}", execColId)
+                            .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""));
                     execHeaderAdded = true;
                     continue;
                 }
@@ -262,17 +272,15 @@ public class GHHelper {
                 ExecInfo execInfo = getExecInfo(srcExecCnt, dstExecCnt);
 
                 // adding exec-info
-                jse.executeScript(("arguments[0].innerHTML += \"<td {title-info} no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
-                                "data-line-number=\\\"{exec-info-label}\\\" " +
-                                "class=\\\"{classes}\\\"></td>\";" +
-                                "var lastChildInd = arguments[0].childNodes.length - 1;" +
-                                "arguments[0].childNodes[lastChildInd].after(arguments[0].childNodes[lastChildInd - 2]);")
-                                .replace("{exec-info-label}", execInfo.getLabel())
-                                .replace("{title-info}", "title=\\\"" + execInfo.getTooltip() + "\\\"")
-                                .replace("{classes}", colElems.get(1).getAttribute("class"))
-                                .replace("{contains-exec-diff}",
-                                        ((currentLinesWithFewerExec + currentLinesWithFewerExec) != 0) + ""),
-                        lineElem);
+                jse.executeScript(("document.querySelector('#{exec-col-id}').innerHTML += \"<div {title-info} no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
+                        "class=\\\"blob-num\\\" style=\\\"width: 100%; text-align: center\\\">" +
+                        "{exec-info-label}</div>\";")
+                        .replace("{exec-col-id}", execColId)
+                        .replace("{exec-info-label}", execInfo.getLabel())
+                        .replace("{height}", lineElem.getSize().getHeight() + "")
+                        .replace("{title-info}", "title=\\\"" + execInfo.getTooltip() + "\\\"")
+                        .replace("{contains-exec-diff}",
+                                ((currentLinesWithFewerExec + currentLinesWithFewerExec) != 0) + ""));
             }
             totalLinesWithMoreExec += currentLinesWithMoreExec;
             totalLinesWithFewerExec += currentLinesWithFewerExec;
@@ -307,10 +315,10 @@ public class GHHelper {
 
         // creating the tooltip
         String tooltip = null;
-        if(dstExecCnt < 0) {
+        if (dstExecCnt < 0) {
             if (!(srcExecCnt < 0))
                 tooltip = srcExecCnt + " execution(s) in original version";
-        }else {
+        } else {
             if (srcExecCnt < 0)
                 tooltip = dstExecCnt + " execution(s)  in the patched version";
             else
@@ -355,10 +363,10 @@ public class GHHelper {
                 expandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size();
     }
 
-    private static class ExecInfo{
+    private static class ExecInfo {
         private String label, tooltip;
 
-        public ExecInfo(String label, String tooltip){
+        public ExecInfo(String label, String tooltip) {
             this.label = label;
             this.tooltip = tooltip;
         }
