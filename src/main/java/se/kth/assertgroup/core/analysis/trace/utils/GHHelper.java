@@ -214,7 +214,7 @@ public class GHHelper {
 
                 if (lineElem.getAttribute("class").contains("js-expandable-line")) { // its not a source line
                     jse.executeScript(("arguments[0].innerHTML = \"<td class=\\\"{classes}\\\" " +
-                                    "style=\\\"text-align: center; border-right: 1px black solid\\\">{exec-header}</td>\" + arguments[0].innerHTML")
+                                    "style=\\\"text-align: center\\\">{exec-header}</td>\" + arguments[0].innerHTML")
                                     .replace("{classes}", colElems.get(0).getAttribute("class"))
                                     .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
                             lineElem);
@@ -230,7 +230,7 @@ public class GHHelper {
                 if ((srcLineNumAttr != null && !srcLineNumAttr.matches("-?\\d+")) ||
                         (dstLineNumAttr != null && !dstLineNumAttr.matches("-?\\d+"))) {
                     jse.executeScript(("arguments[0].innerHTML = \"<td class=\\\"{classes}\\\" " +
-                                    "style=\\\"text-align: center; border-right: 1px solid black;\\\">{exec-header}</td>\" + arguments[0].innerHTML")
+                                    "style=\\\"text-align: center\\\">{exec-header}</td>\" + arguments[0].innerHTML")
                                     .replace("{classes}", colElems.get(0).getAttribute("class"))
                                     .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
                             lineElem);
@@ -261,8 +261,7 @@ public class GHHelper {
                 ExecInfo execInfo = getExecInfo(srcExecCnt, dstExecCnt);
 
                 // adding exec-info
-                jse.executeScript(("arguments[0].innerHTML = \"<td {title-info} style=\\\"background-color: {back-color};" +
-                                "border-right: 1px solid black;\\\" " +
+                jse.executeScript(("arguments[0].innerHTML = \"<td {title-info} style=\\\"background-color: {back-color}\\\" " +
                                 "no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
                                 "data-line-number=\\\"{exec-info-label}\\\" " +
                                 "class=\\\"{classes}\\\"></td>\" + arguments[0].innerHTML")
