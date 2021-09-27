@@ -251,18 +251,22 @@ public class GHHelper {
                 int dstExecCnt = patchedCoverage.containsKey(dstLineNum) ? patchedCoverage.get(dstLineNum) : -1,
                         srcExecCnt = originalCoverage.containsKey(srcLineNum)
                                 ? originalCoverage.get(srcLineNum) : -1;
+
+                String backgroundCol = "white";
                 if (srcLineNum >= 0 && dstLineNum >= 0) {
                     int diffExecCnt = !patchedCoverage.containsKey(dstLineNum) || !originalCoverage.containsKey(srcLineNum)
                             ? 0 : patchedCoverage.get(dstLineNum) - originalCoverage.get(srcLineNum);
                     currentLinesWithMoreExec += diffExecCnt > 0 ? 1 : 0;
                     currentLinesWithEqualExec += diffExecCnt == 0 ? 1 : 0;
                     currentLinesWithFewerExec += diffExecCnt < 0 ? 1 : 0;
+                    backgroundCol = diffExecCnt > 0 ? "#ccffd8" : (diffExecCnt < 0 ? "#ffd7d5" : "white");
                 }
 
                 ExecInfo execInfo = getExecInfo(srcExecCnt, dstExecCnt);
 
                 // adding exec-info
-                jse.executeScript(("arguments[0].innerHTML += \"<td {title-info} no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
+                jse.executeScript(("arguments[0].innerHTML += \"<td {title-info} style=\\\"background-color: {back-color}\\\" " +
+                                "no-empty-exec-info=\\\"{contains-exec-diff}\\\" " +
                                 "data-line-number=\\\"{exec-info-label}\\\" " +
                                 "class=\\\"{classes}\\\"></td>\";" +
                                 "var lastChildInd = arguments[0].childNodes.length - 1;" +
@@ -270,6 +274,7 @@ public class GHHelper {
                                 .replace("{exec-info-label}", execInfo.getLabel())
                                 .replace("{title-info}", "title=\\\"" + execInfo.getTooltip() + "\\\"")
                                 .replace("{classes}", colElems.get(1).getAttribute("class"))
+                                .replace("{back-color}", backgroundCol)
                                 .replace("{contains-exec-diff}",
                                         ((currentLinesWithFewerExec + currentLinesWithFewerExec) != 0) + ""),
                         lineElem);
