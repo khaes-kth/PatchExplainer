@@ -1,5 +1,8 @@
 package se.kth.assertgroup.core.analysis.trace.models;
 
+import java.util.Map;
+import java.util.Set;
+
 public class GHReports {
     private String expandedReport, unexpandedReport;
     private ReportSummary summary;
@@ -37,16 +40,19 @@ public class GHReports {
 
     public static class ReportSummary{
         private int linesWithMoreExec, linesWithFewerExec, linesWithEqualExec;
+        private Map<String, String> pathToSummaryHTML;
 
         public ReportSummary
                 (
                         int linesWithMoreExec,
                         int linesWithFewerExec,
-                        int linesWithEqualExec
+                        int linesWithEqualExec,
+                        Map<String, String> pathToSummaryHTML
                 ){
             this.linesWithMoreExec = linesWithMoreExec;
             this.linesWithFewerExec = linesWithFewerExec;
             this.linesWithEqualExec = linesWithEqualExec;
+            this.pathToSummaryHTML = pathToSummaryHTML;
         }
 
         public int getLinesWithEqualExec() {
@@ -71,6 +77,14 @@ public class GHReports {
 
         public void setLinesWithMoreExec(int linesWithMoreExec) {
             this.linesWithMoreExec = linesWithMoreExec;
+        }
+
+        public Map<String, String> getPathToSummaryHTML() {
+            return pathToSummaryHTML;
+        }
+
+        public void setPathToSummaryHTML(Map<String, String> pathToSummaryHTML) {
+            this.pathToSummaryHTML = pathToSummaryHTML;
         }
     }
 }

@@ -93,14 +93,14 @@ public class GHHelper {
         WebDriver expandingDriver = new ChromeDriver(options);
         try {
             // adding trace data to both expanding and non-expanding versions
-            nonExpandingDriver.get(commitUrl);
-            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
-            addTraceData(nonExpandingDriver, modifiedFiles, originalCoverages, patchedCoverages, false);
-
             expandingDriver.get(commitUrl);
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
             reportSummary =
-                    addTraceData(expandingDriver, modifiedFiles, originalCoverages, patchedCoverages, true);
+                    addTraceData(expandingDriver, modifiedFiles, originalCoverages, patchedCoverages, true, null);
+
+            nonExpandingDriver.get(commitUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+            addTraceData(nonExpandingDriver, modifiedFiles, originalCoverages, patchedCoverages, false, reportSummary);
 
 
             // adding link to expanded version in the unexpanded version
@@ -122,43 +122,51 @@ public class GHHelper {
         }
     }
 
-    private static void addExecDiffSummary
-            (
-                    WebDriver driver,
-                    WebElement diffElem,
-                    GHReports.ReportSummary summary
-            ) {
-        int redSlots = summary.getLinesWithFewerExec() > 0 ? 1 : 0,
-                greenSlots = summary.getLinesWithMoreExec() > 0 ? 1 : 0,
-                graySlots = summary.getLinesWithEqualExec() > 0 ? 1 : 0;
-
-        if (summary.getLinesWithMoreExec() < summary.getLinesWithFewerExec())
-            redSlots = 5 - greenSlots - graySlots;
-        else if (summary.getLinesWithFewerExec() < summary.getLinesWithMoreExec())
-            greenSlots = 5 - redSlots - graySlots;
+    // returns the summary span's html
+    private static String addExecDiffSummary
+    (
+            WebDriver driver,
+            WebElement diffElem,
+            GHReports.ReportSummary summary
+    ) {
+        String path = diffElem.getAttribute("data-path"), summaryHTML = null;
+        if (summary != null && summary.getPathToSummaryHTML() != null && summary.getPathToSummaryHTML().containsKey(path))
+            summaryHTML = summary.getPathToSummaryHTML().get(path);
         else {
-            redSlots = greenSlots = 2;
-            graySlots = 1;
+            int redSlots = summary.getLinesWithFewerExec() > 0 ? 1 : 0,
+                    greenSlots = summary.getLinesWithMoreExec() > 0 ? 1 : 0,
+                    graySlots = summary.getLinesWithEqualExec() > 0 ? 1 : 0;
+
+            if (summary.getLinesWithMoreExec() < summary.getLinesWithFewerExec())
+                redSlots = 5 - greenSlots - graySlots;
+            else if (summary.getLinesWithFewerExec() < summary.getLinesWithMoreExec())
+                greenSlots = 5 - redSlots - graySlots;
+            else {
+                redSlots = greenSlots = 2;
+                graySlots = 1;
+            }
+
+            List<String> summaryLabelClasses = new ArrayList<>();
+            summaryLabelClasses.addAll(Collections.nCopies(redSlots, "<span class=\\\"diffstat-block-deleted\\\"></span>"));
+            summaryLabelClasses.addAll(Collections.nCopies(greenSlots, "<span class=\\\"diffstat-block-added\\\"></span>"));
+            summaryLabelClasses.addAll(Collections.nCopies(graySlots, "<span class=\\\"diffstat-block-neutral\\\"></span>"));
+
+            summaryHTML = ("<span class=\\\"diffstat tooltipped tooltipped-e\\\" aria-label=\\\"{more-exec} lines executed " +
+                    "more &amp; {fewer-exec} lines executed fewer times.\\\"><span style=\\\"margin-right: 5px\\\">EXEC-DIFF: {total-changed}</span>" +
+                    "{spans}</span>")
+                    .replace("{more-exec}", summary.getLinesWithMoreExec() + "")
+                    .replace("{fewer-exec}", summary.getLinesWithFewerExec() + "")
+                    .replace("{equal-exec}", summary.getLinesWithEqualExec() + "")
+                    .replace("{spans}", StringUtils.join(summaryLabelClasses, ""))
+                    .replace("{total-changed}",
+                            (summary.getLinesWithFewerExec() + summary.getLinesWithMoreExec()) + "");
         }
-
-        List<String> summaryLabelClasses = new ArrayList<>();
-        summaryLabelClasses.addAll(Collections.nCopies(redSlots, "<span class=\\\"diffstat-block-deleted\\\"></span>"));
-        summaryLabelClasses.addAll(Collections.nCopies(greenSlots, "<span class=\\\"diffstat-block-added\\\"></span>"));
-        summaryLabelClasses.addAll(Collections.nCopies(graySlots, "<span class=\\\"diffstat-block-neutral\\\"></span>"));
-
-        String summaryHTML = ("<span class=\\\"diffstat tooltipped tooltipped-e\\\" aria-label=\\\"{more-exec} lines executed " +
-                "more &amp; {fewer-exec} lines executed fewer times.\\\"><span style=\\\"margin-right: 5px\\\">EXEC-DIFF: {total-changed}</span>" +
-                "{spans}</span>")
-                .replace("{more-exec}", summary.getLinesWithMoreExec() + "")
-                .replace("{fewer-exec}", summary.getLinesWithFewerExec() + "")
-                .replace("{equal-exec}", summary.getLinesWithEqualExec() + "")
-                .replace("{spans}", StringUtils.join(summaryLabelClasses, ""))
-                .replace("{total-changed}",
-                        (summary.getLinesWithFewerExec() + summary.getLinesWithMoreExec()) + "");
 
         ((JavascriptExecutor) driver)
                 .executeScript(("arguments[0].querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
                         .replace("{new-html}", summaryHTML), diffElem);
+
+        return summaryHTML;
     }
 
     // returns if there is some execution trace diff
@@ -168,9 +176,11 @@ public class GHHelper {
             List<String> modifiedFiles,
             Map<String, Map<Integer, Integer>> originalCoverages,
             Map<String, Map<Integer, Integer>> patchedCoverages,
-            boolean expand
+            boolean expand,
+            GHReports.ReportSummary reportSummary
     ) throws InterruptedException {
         int totalLinesWithMoreExec = 0, totalLinesWithFewerExec = 0, totalLinesWithEqualExec = 0;
+        Map<String, String> pathToSummaryHTML = new HashMap<>();
 
         JavascriptExecutor jse = ((JavascriptExecutor) driver);
 
@@ -278,11 +288,13 @@ public class GHHelper {
             totalLinesWithEqualExec += currentLinesWithEqualExec;
 
             // adding summary info
-            addExecDiffSummary(driver, diffElem, new GHReports.ReportSummary(currentLinesWithMoreExec,
-                    currentLinesWithFewerExec, currentLinesWithEqualExec));
+            pathToSummaryHTML.put(path, addExecDiffSummary(driver, diffElem, new GHReports.ReportSummary(currentLinesWithMoreExec,
+                    currentLinesWithFewerExec, currentLinesWithEqualExec,
+                    reportSummary == null ? null : reportSummary.getPathToSummaryHTML())));
         }
 
-        return new GHReports.ReportSummary(totalLinesWithMoreExec, totalLinesWithFewerExec, totalLinesWithEqualExec);
+        return new GHReports.ReportSummary(totalLinesWithMoreExec, totalLinesWithFewerExec, totalLinesWithEqualExec,
+                pathToSummaryHTML);
     }
 
     private static ExecInfo getExecInfo(int srcExecCnt, int dstExecCnt) {
@@ -306,10 +318,10 @@ public class GHHelper {
 
         // creating the tooltip
         String tooltip = null;
-        if(dstExecCnt < 0) {
+        if (dstExecCnt < 0) {
             if (!(srcExecCnt < 0))
                 tooltip = srcExecCnt + " execution(s) in original version";
-        }else {
+        } else {
             if (srcExecCnt < 0)
                 tooltip = dstExecCnt + " execution(s)  in the patched version";
             else
@@ -354,10 +366,10 @@ public class GHHelper {
                 expandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size();
     }
 
-    private static class ExecInfo{
+    private static class ExecInfo {
         private String label, tooltip;
 
-        public ExecInfo(String label, String tooltip){
+        public ExecInfo(String label, String tooltip) {
             this.label = label;
             this.tooltip = tooltip;
         }
