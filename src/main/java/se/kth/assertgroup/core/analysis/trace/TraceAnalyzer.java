@@ -4,8 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import se.kth.assertgroup.core.analysis.trace.models.GHReports;
 import se.kth.assertgroup.core.analysis.trace.models.ReportConfig;
 import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
@@ -69,10 +67,50 @@ public class TraceAnalyzer {
                 CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
 
         GHReports ghReports =
-                GHHelper.getGHReports(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
+                GHHelper.getGHReportsForCommit(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
 
         if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
             System.out.println("Nothing printed because no execution diff exists: " + slug + "/" + commit);
+            return;
+        }
+
+        outputDir.mkdirs();
+        File unexpandedReportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
+        unexpandedReportFile.createNewFile();
+        File expandedReportFile = outputDir.toPath().resolve(FINAL_EXPANDED_GH_REPORT_FILENAME).toFile();
+        expandedReportFile.createNewFile();
+
+        FileUtils.writeStringToFile(unexpandedReportFile, ghReports.getUnexpandedReport(), "UTF-8");
+        FileUtils.writeStringToFile(expandedReportFile, ghReports.getExpandedReport(), "UTF-8");
+    }
+
+    // does not use Spoon for line mapping, uses GH unified diff mapping instead
+    public void generateTraceDiffsForGHPR
+    (
+            String slug,
+            String pr,
+            File originalMvnDir,
+            File patchedMvnDir,
+            File outputDir,
+            String expandedVersionLink
+    ) throws Exception {
+        List<String> modifiedFilePaths =
+                GHHelper.clonePRAndGetChangedSources(slug, pr, originalMvnDir, patchedMvnDir);
+        if(modifiedFilePaths == null || modifiedFilePaths.isEmpty()) {
+            System.out.println("Nothing printed because no execution diff exists for pr: " + slug + "/" + pr);
+            return;
+        }
+
+        Map<String, Map<Integer, Integer>> originalCoverages =
+                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
+        Map<String, Map<Integer, Integer>> patchedCoverages =
+                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
+
+        GHReports ghReports =
+                GHHelper.getGHReportsForPR(slug, pr, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
+
+        if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
+            System.out.println("Nothing printed because no execution diff exists for pr: " + slug + "/" + pr);
             return;
         }
 
@@ -258,9 +296,14 @@ public class TraceAnalyzer {
 //                .generateTraceDiffsForGHCommit("brianfrankcooper/YCSB",
 //                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
 //                        original, patched, outputDir, "http://example.com");
+//        new TraceAnalyzer()
+//                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
+//                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+//                        original, patched, outputDir, "http://example.com");
+
         new TraceAnalyzer()
-                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+                .generateTraceDiffsForGHPR("kungfoo/geohash-java",
+                        "45",
                         original, patched, outputDir, "http://example.com");
 
     }

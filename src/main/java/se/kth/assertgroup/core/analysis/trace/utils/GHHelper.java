@@ -16,8 +16,12 @@ import java.util.*;
 public class GHHelper {
     private static final String GH_COMMIT_KEYWORD = "{commit}";
     private static final String GH_SLUG_KEYWORD = "{slug}";
+    private static final String GH_PR_KEYWORD = "{pr}";
+    private static final String GH_PR_URL_TEMPLATE = "https://github.com/" + GH_SLUG_KEYWORD
+            + "/pull/" + GH_PR_KEYWORD + "/files";
     private static final String GH_COMMIT_URL_TEMPLATE = "https://github.com/" + GH_SLUG_KEYWORD
             + "/commit/" + GH_COMMIT_KEYWORD;
+    private static final String GH_PR_REF_TEMPLATE = "pull/" + GH_PR_KEYWORD + "/head";
     private static final String GH_REPO_URL_TEMPLATE = "https://github.com/" + GH_SLUG_KEYWORD + ".git";
     private static final String GIT_PREVIOUS_COMMIT_REF = "HEAD~1";
 
@@ -73,7 +77,69 @@ public class GHHelper {
         }
     }
 
-    public static GHReports getGHReports
+    public static List<String> clonePRAndGetChangedSources
+            (
+                    String slug,
+                    String pr,
+                    File originalDir,
+                    File patchedDir
+            ) throws Exception {
+        int commitCnt = 0;
+        List<String> modifiedSrcPaths = new ArrayList<>();
+
+        String prUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pr);
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
+        WebDriver driver = new ChromeDriver(options);
+        try {
+            driver.get(prUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+
+            List<WebElement> changedFileElems = driver.findElements(By.cssSelector("a.Link--primary"));
+            for (WebElement changedFileElem : changedFileElems) {
+                String filePath = changedFileElem.getText();
+                if (filePath != null && filePath.endsWith(JAVA_FILE_EXTENSION))
+                    modifiedSrcPaths.add(filePath);
+            }
+
+            WebElement commitsButton = driver.findElement(By.cssSelector("[href$=\"commits\"]"));
+            commitsButton.click();
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+
+            commitCnt = driver.findElements(By.cssSelector("[aria-label=\"View commit details\"]")).size();
+        } catch (Exception e){
+            throw new Exception("Cannot load the PR page.");
+        }
+
+
+        originalDir.mkdirs();
+        patchedDir.mkdirs();
+
+        String repoGitUrl = GH_REPO_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug);
+        int cloneRes = PH.run(patchedDir, "cloning " + slug, "git", "clone", repoGitUrl, ".");
+        if (cloneRes != 0)
+            throw new Exception("Cannot clone " + slug);
+
+        int checkoutRes = PH.run(patchedDir, "(1) checkout to pr " + pr, "git", "fetch", "origin",
+                GH_PR_REF_TEMPLATE.replace(GH_PR_KEYWORD, pr) + ":explainer-tmp");
+        if (checkoutRes != 0)
+            throw new Exception("Cannot checkout pr " + pr);
+
+        checkoutRes = PH.run(patchedDir, "(2) checkout to pr " + pr, "git", "checkout", "explainer-tmp");
+        if (checkoutRes != 0)
+            throw new Exception("Cannot checkout to pr " + pr);
+
+        FileUtils.copyDirectory(patchedDir, originalDir);
+
+        checkoutRes = PH.run(originalDir, "checkout to prevoius commit of pr " + pr, "git", "checkout",
+                "HEAD~" + commitCnt);
+        if (checkoutRes != 0)
+            throw new Exception("Cannot checkout to previous version of pr " + pr);
+
+        return modifiedSrcPaths;
+    }
+
+    public static GHReports getGHReportsForCommit
             (
                     String slug,
                     String commit,
@@ -82,10 +148,37 @@ public class GHHelper {
                     Map<String, Map<Integer, Integer>> patchedCoverages,
                     String linkToExpanded
             ) {
+        String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
+
+
+        return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, commitUrl);
+    }
+
+    public static GHReports getGHReportsForPR
+            (
+                    String slug,
+                    String pr,
+                    List<String> modifiedFiles,
+                    Map<String, Map<Integer, Integer>> originalCoverages,
+                    Map<String, Map<Integer, Integer>> patchedCoverages,
+                    String linkToExpanded
+            ) {
+        String prUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pr);
+
+
+        return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, prUrl);
+    }
+
+    private static GHReports getGhReportsForDiffPage
+            (
+                    List<String> modifiedFiles,
+                    Map<String, Map<Integer, Integer>> originalCoverages,
+                    Map<String, Map<Integer, Integer>> patchedCoverages,
+                    String linkToExpanded,
+                    String diffPageUrl
+            ) {
         String unexpandedHTML = null, expandedHTML = null;
         GHReports.ReportSummary reportSummary = null;
-
-        String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("headless");
@@ -93,12 +186,12 @@ public class GHHelper {
         WebDriver expandingDriver = new ChromeDriver(options);
         try {
             // adding trace data to both expanding and non-expanding versions
-            expandingDriver.get(commitUrl);
+            expandingDriver.get(diffPageUrl);
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
             reportSummary =
                     addTraceData(expandingDriver, modifiedFiles, originalCoverages, patchedCoverages, true, null);
 
-            nonExpandingDriver.get(commitUrl);
+            nonExpandingDriver.get(diffPageUrl);
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
             addTraceData(nonExpandingDriver, modifiedFiles, originalCoverages, patchedCoverages, false, reportSummary);
 
@@ -233,7 +326,15 @@ public class GHHelper {
                 }
 
                 // extracting src and dst line numbers
-
+                if(colElems.size() < 2) { // probably a comment in a PR
+                    jse.executeScript(("arguments[0].innerHTML = \"<td class=\\\"{classes}\\\" " +
+                                    "style=\\\"text-align: center\\\">{exec-header}</td>\" + arguments[0].innerHTML")
+                                    .replace("{classes}", colElems.get(0).getAttribute("class"))
+                                    .replace("{exec-header}", !execHeaderAdded ? "EXEC-DIFF" : ""),
+                            lineElem);
+                    execHeaderAdded = true;
+                    continue;
+                }
                 String srcLineNumAttr = colElems.get(0).getAttribute("data-line-number"),
                         dstLineNumAttr = colElems.get(1).getAttribute("data-line-number");
 
@@ -320,12 +421,12 @@ public class GHHelper {
         String tooltip = null;
         if (dstExecCnt < 0) {
             if (!(srcExecCnt < 0))
-                tooltip = srcExecCnt + " execution(s) in original version";
+                tooltip = leftCol + " execution(s) in original version";
         } else {
             if (srcExecCnt < 0)
-                tooltip = dstExecCnt + " execution(s)  in the patched version";
+                tooltip = rightCol + " execution(s)  in the patched version";
             else
-                tooltip = dstExecCnt + " execution(s) in the patched, " +
+                tooltip = rightCol + " execution(s) in the patched, " +
                         ((srcExecCnt != dstExecCnt) ? (leftCol + " compared to the original.")
                                 : "no change compared to the original.");
         }
@@ -353,17 +454,21 @@ public class GHHelper {
                 "a.title = \"{title}\";\n" +
                 "a.href = \"{link-to-full}\";\n" +
                 "a.className = \"float-right ml-2\";\n" +
-                "var item = document.querySelector(\"div.ml-2\"); item.parentNode.replaceChild(a, item);")
+                "var item = document.querySelector(\"div.ml-2\") == null ? document.querySelector(\"#diffstat\") " +
+                    ": document.querySelector(\"div.ml-2\");" +
+                "item.parentNode.replaceChild(a, item);")
                 .replace("{link-to-full}", linkToExpanded)
-                .replace("{title}", "There are " + (showExpandWarning ? "" : "no")
+                .replace("{title}", "There are " + (showExpandWarning ? "some" : "no")
                         + " execution trace diffs not visible on this page."));
 
-        ((JavascriptExecutor) expandingDriver).executeScript("document.querySelector(\"div.ml-2\").remove();");
+        ((JavascriptExecutor) expandingDriver).executeScript(
+                "if (document.querySelector(\"div.ml-2\") == null) document.querySelector(\"#diffstat\").remove(); " +
+                        "else document.querySelector(\"div.ml-2\").remove();");
     }
 
     private static boolean expandedContainsExecDiff(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
-        return nonExpandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size() !=
-                expandingDriver.findElements(By.cssSelector("td[contains-exec-diff='true']")).size();
+        return nonExpandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size() !=
+                expandingDriver.findElements(By.cssSelector("td[no-empty-exec-info='true']")).size();
     }
 
     private static class ExecInfo {

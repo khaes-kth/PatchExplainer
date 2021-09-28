@@ -53,7 +53,7 @@ public class CloverHelper {
 
 
         Map<String, Map<Integer, Integer>> res = new HashMap<>();
-        for(String modifiedFilePath : modifiedFilePaths){
+        for (String modifiedFilePath : modifiedFilePaths) {
             res.put(modifiedFilePath, getPerLineCoverage(projectDir, Path.of(modifiedFilePath)));
         }
         return res;
@@ -67,6 +67,10 @@ public class CloverHelper {
         org.jsoup.nodes.Element reportElem =
                 doc.select(CLOVER_FILE_REPORT_SELECTOR
                         .replace(CLOVER_SRC_PATH_KEYWORD, modifiedFileRelativePath.toString())).first();
+
+        if (reportElem == null)
+            return res;
+
         reportElem.select("line").forEach(lineElem -> {
             int lineNum = Integer.parseInt(lineElem.attr("num"));
             int cnt = (lineElem.hasAttr("count") ? Integer.parseInt(lineElem.attr("count")) : 0)
