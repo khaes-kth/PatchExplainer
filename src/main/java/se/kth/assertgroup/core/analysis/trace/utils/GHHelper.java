@@ -60,6 +60,8 @@ public class GHHelper {
 
         String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("headless");
         WebDriver driver = new ChromeDriver(options);
         try {
@@ -90,6 +92,8 @@ public class GHHelper {
         String prUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pr);
         ChromeOptions options = new ChromeOptions();
         options.addArguments("headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         WebDriver driver = new ChromeDriver(options);
         try {
             driver.get(prUrl);
@@ -181,6 +185,8 @@ public class GHHelper {
         GHReports.ReportSummary reportSummary = null;
 
         ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("headless");
         WebDriver nonExpandingDriver = new ChromeDriver(options);
         WebDriver expandingDriver = new ChromeDriver(options);
@@ -244,8 +250,8 @@ public class GHHelper {
             summaryLabelClasses.addAll(Collections.nCopies(greenSlots, "<span class=\\\"diffstat-block-added\\\"></span>"));
             summaryLabelClasses.addAll(Collections.nCopies(graySlots, "<span class=\\\"diffstat-block-neutral\\\"></span>"));
 
-            summaryHTML = ("<span class=\\\"diffstat tooltipped tooltipped-e\\\" aria-label=\\\"{more-exec} lines executed " +
-                    "more &amp; {fewer-exec} lines executed fewer times.\\\"><span style=\\\"margin-right: 5px\\\">EXEC-DIFF: {total-changed}</span>" +
+            summaryHTML = ("EXEC-DIFF <br> <span class=\\\"diffstat tooltipped tooltipped-e\\\" aria-label=\\\"{more-exec} lines executed " +
+                    "more &amp; {fewer-exec} lines executed fewer times.\\\"><span style=\\\"margin-right: 5px\\\">{total-changed}</span>" +
                     "{spans}</span>")
                     .replace("{more-exec}", summary.getLinesWithMoreExec() + "")
                     .replace("{fewer-exec}", summary.getLinesWithFewerExec() + "")
@@ -255,8 +261,11 @@ public class GHHelper {
                             (summary.getLinesWithFewerExec() + summary.getLinesWithMoreExec()) + "");
         }
 
+//        ((JavascriptExecutor) driver)
+//                .executeScript(("arguments[0].querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
+//                        .replace("{new-html}", summaryHTML), diffElem);
         ((JavascriptExecutor) driver)
-                .executeScript(("arguments[0].querySelector(\"details.js-file-header-dropdown\").parentNode.innerHTML = \"{new-html}\"")
+                .executeScript(("arguments[0].parentNode.querySelector(\"td\").innerHTML = \"{new-html}\"")
                         .replace("{new-html}", summaryHTML), diffElem);
 
         return summaryHTML;
@@ -410,15 +419,20 @@ public class GHHelper {
 
             if (!(srcExecCnt < 0)) {
                 int diffExecCnt = dstExecCnt - srcExecCnt;
-                leftCol = "(" + (diffExecCnt > 0 ? "+" : "") + toHumanReadableStr(diffExecCnt) + ")";
+                leftCol = (diffExecCnt > 0 ? "+" : "") + toHumanReadableStr(diffExecCnt);
             }
         }
 
-        String label = leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
+        // old version with two columns
+//        String label = leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
 
+        // new version with one column and only for changed lines
+        String labelContent = leftCol.length() == 0 ? "--" : leftCol,
+                label = "&nbsp;".repeat((11 - labelContent.length()) / 2) + labelContent +
+                        "&nbsp;".repeat(11 - labelContent.length() - (11 - labelContent.length()) / 2);
 
         // creating the tooltip
-        String tooltip = null;
+        String tooltip = "";
         if (dstExecCnt < 0) {
             if (!(srcExecCnt < 0))
                 tooltip = leftCol + " execution(s) in original version";
