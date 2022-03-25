@@ -52,36 +52,13 @@ public class TraceAnalyzer {
                     File originalMvnDir,
                     File patchedMvnDir,
                     File outputDir,
-                    String expandedVersionLink
+                    String expandedVersionLink,
+                    String selectedTest
             ) throws Exception {
         List<String> modifiedFilePaths =
                 GHHelper.cloneCommitAndGetChangedSources(slug, commit, originalMvnDir, patchedMvnDir);
-        if(modifiedFilePaths == null || modifiedFilePaths.isEmpty()) {
-            System.out.println("Nothing printed because no execution diff exists: " + slug + "/" + commit);
-            return;
-        }
-
-        Map<String, Map<Integer, Integer>> originalCoverages =
-                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
-        Map<String, Map<Integer, Integer>> patchedCoverages =
-                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
-
-        GHReports ghReports =
-                GHHelper.getGHReportsForCommit(slug, commit, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
-
-        if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
-            System.out.println("Nothing printed because no execution diff exists: " + slug + "/" + commit);
-            return;
-        }
-
-        outputDir.mkdirs();
-        File unexpandedReportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
-        unexpandedReportFile.createNewFile();
-        File expandedReportFile = outputDir.toPath().resolve(FINAL_EXPANDED_GH_REPORT_FILENAME).toFile();
-        expandedReportFile.createNewFile();
-
-        FileUtils.writeStringToFile(unexpandedReportFile, ghReports.getUnexpandedReport(), "UTF-8");
-        FileUtils.writeStringToFile(expandedReportFile, ghReports.getExpandedReport(), "UTF-8");
+        generateTraceDiffsForGHChange(slug, commit, originalMvnDir, patchedMvnDir, outputDir, expandedVersionLink,
+                modifiedFilePaths, GHHelper.ChangeType.COMMIT, selectedTest);
     }
 
     // does not use Spoon for line mapping, uses GH unified diff mapping instead
@@ -92,25 +69,40 @@ public class TraceAnalyzer {
             File originalMvnDir,
             File patchedMvnDir,
             File outputDir,
-            String expandedVersionLink
+            String expandedVersionLink,
+            String selectedTest
     ) throws Exception {
         List<String> modifiedFilePaths =
                 GHHelper.clonePRAndGetChangedSources(slug, pr, originalMvnDir, patchedMvnDir);
+        generateTraceDiffsForGHChange(slug, pr, originalMvnDir, patchedMvnDir, outputDir, expandedVersionLink,
+                modifiedFilePaths, GHHelper.ChangeType.PR, selectedTest);
+        return;
+    }
+
+    public void generateTraceDiffsForGHChange
+            (
+                    String slug, String changeId,
+                    File originalMvnDir, File patchedMvnDir, File outputDir,
+                    String expandedVersionLink, List<String> modifiedFilePaths,
+                    GHHelper.ChangeType changeType,
+                    String selectedTest
+            ) throws Exception {
         if(modifiedFilePaths == null || modifiedFilePaths.isEmpty()) {
-            System.out.println("Nothing printed because no execution diff exists for pr: " + slug + "/" + pr);
+            System.out.println("Nothing printed because no execution diff exists for change: " + slug + "/" + changeId);
             return;
         }
 
         Map<String, Map<Integer, Integer>> originalCoverages =
-                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths, selectedTest);
         Map<String, Map<Integer, Integer>> patchedCoverages =
-                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths, selectedTest);
 
         GHReports ghReports =
-                GHHelper.getGHReportsForPR(slug, pr, modifiedFilePaths, originalCoverages, patchedCoverages, expandedVersionLink);
+                GHHelper.getGHReports(slug, changeId, modifiedFilePaths, originalCoverages, patchedCoverages,
+                        expandedVersionLink, changeType);
 
         if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
-            System.out.println("Nothing printed because no execution diff exists for pr: " + slug + "/" + pr);
+            System.out.println("Nothing printed because no execution diff exists for change: " + slug + "/" + changeId);
             return;
         }
 
@@ -130,9 +122,10 @@ public class TraceAnalyzer {
                     File patchedMvnDir,
                     File outputDir,
                     String modifiedFilePathsStr,
-                    String reportConfigsStr
+                    String reportConfigsStr,
+                    String selectedTest
             ) throws Exception {
-        TraceInfo traceInfo = extractTraceInfo(originalMvnDir, patchedMvnDir, modifiedFilePathsStr);
+        TraceInfo traceInfo = extractTraceInfo(originalMvnDir, patchedMvnDir, modifiedFilePathsStr, selectedTest);
 
         List<String> modifiedFilePaths = Arrays.asList(modifiedFilePathsStr.split(INPUT_STR_SEPARATOR));
 
@@ -149,7 +142,8 @@ public class TraceAnalyzer {
             (
                     File originalMvnDir,
                     File patchedMvnDir,
-                    String modifiedFilePathsStr
+                    String modifiedFilePathsStr,
+                    String selectedTest
             ) throws Exception {
         if(modifiedFilePathsStr.isEmpty())
             return null;
@@ -161,9 +155,9 @@ public class TraceAnalyzer {
                     patchedMvnDir.toPath().resolve(path).toFile()));
 
         Map<String, Map<Integer, Integer>> originalCoverages =
-                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(originalMvnDir, modifiedFilePaths, selectedTest);
         Map<String, Map<Integer, Integer>> patchedCoverages =
-                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths);
+                CloverHelper.getPerLineCoverages(patchedMvnDir, modifiedFilePaths, selectedTest);
 
         return new TraceInfo(filePathToLineMapping, originalCoverages, patchedCoverages);
     }
@@ -297,14 +291,24 @@ public class TraceAnalyzer {
 //                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
 //                        original, patched, outputDir, "http://example.com");
 //        new TraceAnalyzer()
-//                .generateTraceDiffsForGHCommit("khaes-kth/Patch-Explainer-Test",
-//                        "6c46a523c554d5a1ae937d334d6370be7a8cb9f6",
+//                .generateTraceDiffsForGHCommit("khaes-kth/drr-as-pr",
+//                        "9e7c73de8437cfaf52671dd0adc7ab80a335a8f2",
+//                        original, patched, outputDir, "http://example.com");
+
+//        new TraceAnalyzer()
+//                .generateTraceDiffsForGHPR("kungfoo/geohash-java",
+//                        "45",
 //                        original, patched, outputDir, "http://example.com");
 
         new TraceAnalyzer()
-                .generateTraceDiffsForGHPR("kungfoo/geohash-java",
-                        "45",
-                        original, patched, outputDir, "http://example.com");
+                .generateTraceDiffsForGHChange("khaes-kth/drr-as-pr",
+                        "b22e1efbdce25bc6666ee649a6a9369259f8efd3",
+                        original, patched, outputDir, "http://example.com",
+                        Arrays.asList(new String[]{
+                                "src/main/java/org/joda/time/DateTimeZone.java"
+                        }),
+                        GHHelper.ChangeType.COMMIT,
+                        null);
 
     }
 }

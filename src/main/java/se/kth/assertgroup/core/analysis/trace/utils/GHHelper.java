@@ -143,34 +143,27 @@ public class GHHelper {
         return modifiedSrcPaths;
     }
 
-    public static GHReports getGHReportsForCommit
+    public static GHReports getGHReports
             (
                     String slug,
-                    String commit,
+                    String id,
                     List<String> modifiedFiles,
                     Map<String, Map<Integer, Integer>> originalCoverages,
                     Map<String, Map<Integer, Integer>> patchedCoverages,
-                    String linkToExpanded
+                    String linkToExpanded,
+                    ChangeType changeType
             ) {
-        String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
+        String pageUrl = null;
+        switch (changeType){
+            case COMMIT:
+                pageUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, id);
+                break;
+            case PR:
+                pageUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pageUrl);
+                break;
+        }
 
-
-        return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, commitUrl);
-    }
-
-    public static GHReports getGHReportsForPR
-            (
-                    String slug,
-                    String pr,
-                    List<String> modifiedFiles,
-                    Map<String, Map<Integer, Integer>> originalCoverages,
-                    Map<String, Map<Integer, Integer>> patchedCoverages,
-                    String linkToExpanded
-            ) {
-        String prUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pr);
-
-
-        return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, prUrl);
+        return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, pageUrl);
     }
 
     private static GHReports getGhReportsForDiffPage
@@ -291,6 +284,11 @@ public class GHHelper {
         List<WebElement> diffElems = driver.findElements(By.cssSelector("div[data-path]"));
         for (WebElement diffElem : diffElems) {
             String path = diffElem.getAttribute("data-path");
+
+            // TODO: remove the following line
+            if(!path.startsWith("src/"))
+                path = path.substring(path.indexOf("/") + 1);
+
             Map<Integer, Integer> originalCoverage = originalCoverages.get(path),
                     patchedCoverage = patchedCoverages.get(path);
 
@@ -427,7 +425,7 @@ public class GHHelper {
 //        String label = leftCol + "&nbsp;".repeat(11 - leftCol.length() - rightCol.length()) + rightCol;
 
         // new version with one column and only for changed lines
-        String labelContent = leftCol.length() == 0 ? "--" : leftCol,
+        String labelContent = !leftCol.startsWith("+") && !leftCol.startsWith("-") ? "--" : leftCol,
                 label = "&nbsp;".repeat((11 - labelContent.length()) / 2) + labelContent +
                         "&nbsp;".repeat(11 - labelContent.length() - (11 - labelContent.length()) / 2);
 
@@ -468,16 +466,16 @@ public class GHHelper {
                 "a.title = \"{title}\";\n" +
                 "a.href = \"{link-to-full}\";\n" +
                 "a.className = \"float-right ml-2\";\n" +
-                "var item = document.querySelector(\"div.ml-2\") == null ? document.querySelector(\"#diffstat\") " +
-                    ": document.querySelector(\"div.ml-2\");" +
+                "var item = document.querySelector(\".d-flex.d-inline-block.float-right\") == null ? document.querySelector(\"#diffstat\") " +
+                    ": document.querySelector(\".d-flex.d-inline-block.float-right\");" +
                 "item.parentNode.replaceChild(a, item);")
                 .replace("{link-to-full}", linkToExpanded)
                 .replace("{title}", "There are " + (showExpandWarning ? "some" : "no")
                         + " execution trace diffs not visible on this page."));
 
         ((JavascriptExecutor) expandingDriver).executeScript(
-                "if (document.querySelector(\"div.ml-2\") == null) document.querySelector(\"#diffstat\").remove(); " +
-                        "else document.querySelector(\"div.ml-2\").remove();");
+                "if (document.querySelector(\".d-flex.d-inline-block.float-right\") == null) document.querySelector(\"#diffstat\").remove(); " +
+                        "else document.querySelector(\".d-flex.d-inline-block.float-right\").remove();");
     }
 
     private static boolean expandedContainsExecDiff(WebDriver nonExpandingDriver, WebDriver expandingDriver) {
@@ -508,5 +506,10 @@ public class GHHelper {
         public void setTooltip(String tooltip) {
             this.tooltip = tooltip;
         }
+    }
+
+    public static enum ChangeType{
+        PR,
+        COMMIT
     }
 }
