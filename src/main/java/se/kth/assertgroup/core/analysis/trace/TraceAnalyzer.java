@@ -283,9 +283,9 @@ public class TraceAnalyzer {
 //                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/SwaggerDubboController.java;",
 //                        "showHits-allColors;showHits;allColors; ");
 
-        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/original-tmp2");
-        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp2");
-        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched-tmp2/target/trace");
+        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark");
+        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark2");
+        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark2/target/trace");
 //        new TraceAnalyzer()
 //                .generateTraceDiffsForGHCommit("brianfrankcooper/YCSB",
 //                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
@@ -302,13 +302,13 @@ public class TraceAnalyzer {
 
         new TraceAnalyzer()
                 .generateTraceDiffsForGHChange("khaes-kth/drr-as-pr",
-                        "b22e1efbdce25bc6666ee649a6a9369259f8efd3",
+                        "71fd64576c62458912d339119064578c245af380",
                         original, patched, outputDir, "http://example.com",
                         Arrays.asList(new String[]{
-                                "src/main/java/org/joda/time/DateTimeZone.java"
+                                "cxx-checks/src/main/java/org/sonar/cxx/checks/naming/MethodNameCheck.java"
                         }),
                         GHHelper.ChangeType.COMMIT,
-                        null);
+                        "org.sonar.cxx.checks.naming.MethodNameCheckTest");
 
     }
 }

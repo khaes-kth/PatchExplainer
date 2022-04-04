@@ -1,0 +1,48 @@
+[
+  {
+    "kind": "RETURN",
+    "methodName": "create",
+    "returnType": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone",
+    "value": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone",
+    "location": "org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone:1480",
+    "arguments": [
+      {
+        "kind": "LOCAL_VARIABLE",
+        "name": "id",
+        "type": "java.lang.String",
+        "value": "\"TestDTZ1\"",
+        "nestedTypes": null
+      },
+      {
+        "kind": "LOCAL_VARIABLE",
+        "name": "outputID",
+        "type": "boolean",
+        "value": "true",
+        "nestedTypes": null
+      },
+      {
+        "kind": "LOCAL_VARIABLE",
+        "name": "transitions",
+        "type": "java.util.ArrayList",
+        "value": "java.util.ArrayList",
+        "nestedTypes": null
+      },
+      {
+        "kind": "LOCAL_VARIABLE",
+        "name": "tailZone",
+        "type": "org.joda.time.tz.DateTimeZoneBuilder$DSTZone",
+        "value": "org.joda.time.tz.DateTimeZoneBuilder$DSTZone",
+        "nestedTypes": null
+      }
+    ],
+    "stackTrace": [
+      "create:1480, org.joda.time.tz.DateTimeZoneBuilder$PrecalculatedZone",
+      "toDateTimeZone:396, org.joda.time.tz.DateTimeZoneBuilder",
+      "testDateTimeZoneBuilder:90, org.joda.time.tz.TestCompiler",
+      "runTest:40, se.kth.debug.MethodTestRunner",
+      "lambda$main$0:16, se.kth.debug.MethodTestRunner",
+      "call:-1, se.kth.debug.MethodTestRunner$$Lambda$1.1159190947"
+    ],
+    "nestedTypes": null
+  }
+]

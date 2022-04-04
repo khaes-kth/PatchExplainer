@@ -88,7 +88,7 @@ public class CloverHelper {
     private static void runMvnTest(File projectDir, String selectedTest) throws Exception {
         int exitVal = PH.run(projectDir, "Running maven....", "mvn", "clean",
                 (selectedTest == null ? "" : "-Dtest=" + selectedTest)
-                , "clover:setup", "test", "-fn", "clover:aggregate", "clover:clover",
+                , "clover:setup", "test", "-fn", "-DfailIfNoTests=false", "clover:aggregate", "clover:clover",
                 "-Dmaven.clover.reportDescriptor=" + CLOVER_TARGET_DESCRIPTOR_PATH);
         if (exitVal != 0)
             throw new Exception("Could not run mvn.");
