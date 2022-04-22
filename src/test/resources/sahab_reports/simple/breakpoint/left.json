@@ -1,0 +1,1994 @@
+[
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1142,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1142",
+        "stackTrace": [
+          "buildTailZone:1142, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "testDateTimeZoneBuilder:90, org.joda.time.tz.TestCompiler",
+          "runTest:40, se.kth.debug.MethodTestRunner",
+          "lambda$main$0:16, se.kth.debug.MethodTestRunner",
+          "call:-1, se.kth.debug.MethodTestRunner$$Lambda$1.925858445"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ1\""
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1143,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1143",
+        "stackTrace": [
+          "buildTailZone:1143, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "testDateTimeZoneBuilder:90, org.joda.time.tz.TestCompiler",
+          "runTest:40, se.kth.debug.MethodTestRunner",
+          "lambda$main$0:16, se.kth.debug.MethodTestRunner",
+          "call:-1, se.kth.debug.MethodTestRunner$$Lambda$1.925858445"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ1\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1144,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1144",
+        "stackTrace": [
+          "buildTailZone:1144, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "testDateTimeZoneBuilder:90, org.joda.time.tz.TestCompiler",
+          "runTest:40, se.kth.debug.MethodTestRunner",
+          "lambda$main$0:16, se.kth.debug.MethodTestRunner",
+          "call:-1, se.kth.debug.MethodTestRunner$$Lambda$1.925858445"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ1\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "endRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10800000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "0"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1154,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1154",
+        "stackTrace": [
+          "buildTailZone:1154, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "testDateTimeZoneBuilder:90, org.joda.time.tz.TestCompiler",
+          "runTest:40, se.kth.debug.MethodTestRunner",
+          "lambda$main$0:16, se.kth.debug.MethodTestRunner",
+          "call:-1, se.kth.debug.MethodTestRunner$$Lambda$1.925858445"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ1\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "endRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10800000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "0"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1142,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1142",
+        "stackTrace": [
+          "buildTailZone:1142, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "run:94, org.joda.time.tz.TestCompiler$1"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ2\""
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1143,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1143",
+        "stackTrace": [
+          "buildTailZone:1143, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "run:94, org.joda.time.tz.TestCompiler$1"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ2\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1144,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1144",
+        "stackTrace": [
+          "buildTailZone:1144, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "run:94, org.joda.time.tz.TestCompiler$1"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ2\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "endRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10800000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "0"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file": "org/joda/time/tz/DateTimeZoneBuilder.java",
+    "lineNumber": 1154,
+    "stackFrameContexts": [
+      {
+        "positionFromTopInStackTrace": 1,
+        "location": "org.joda.time.tz.DateTimeZoneBuilder$RuleSet:1154",
+        "stackTrace": [
+          "buildTailZone:1154, org.joda.time.tz.DateTimeZoneBuilder$RuleSet",
+          "toDateTimeZone:372, org.joda.time.tz.DateTimeZoneBuilder",
+          "run:94, org.joda.time.tz.TestCompiler$1"
+        ],
+        "runtimeValueCollection": [
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "id",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "\"TestDTZ2\""
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "startRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "3"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "7200000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "3600000"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "LOCAL_VARIABLE",
+            "name": "endRule",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$Rule",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "iRecurrence",
+                "type": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence",
+                "nestedTypes": [
+                  {
+                    "kind": "FIELD",
+                    "name": "iOfYear",
+                    "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+                    "nestedTypes": [
+                      {
+                        "kind": "FIELD",
+                        "name": "iMode",
+                        "type": "char",
+                        "nestedTypes": null,
+                        "value": "w"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMonthOfYear",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfMonth",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "-1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iDayOfWeek",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "1"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iAdvance",
+                        "type": "boolean",
+                        "nestedTypes": null,
+                        "value": "false"
+                      },
+                      {
+                        "kind": "FIELD",
+                        "name": "iMillisOfDay",
+                        "type": "int",
+                        "nestedTypes": null,
+                        "value": "10800000"
+                      }
+                    ],
+                    "value": "org.joda.time.tz.DateTimeZoneBuilder$OfYear"
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iNameKey",
+                    "type": "java.lang.String",
+                    "nestedTypes": null,
+                    "value": "\"\""
+                  },
+                  {
+                    "kind": "FIELD",
+                    "name": "iSaveMillis",
+                    "type": "int",
+                    "nestedTypes": null,
+                    "value": "0"
+                  }
+                ],
+                "value": "org.joda.time.tz.DateTimeZoneBuilder$Recurrence"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iFromYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "1601"
+              },
+              {
+                "kind": "FIELD",
+                "name": "iToYear",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483647"
+              }
+            ],
+            "value": "org.joda.time.tz.DateTimeZoneBuilder$Rule"
+          },
+          {
+            "kind": "FIELD",
+            "name": "YEAR_LIMIT",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2122"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iStandardOffset",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "3600000"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iRules",
+            "type": "java.util.ArrayList",
+            "nestedTypes": [
+              {
+                "kind": "FIELD",
+                "name": "serialVersionUID",
+                "type": "long",
+                "nestedTypes": null,
+                "value": "8683452581122892189"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULT_CAPACITY",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "10"
+              },
+              {
+                "kind": "FIELD",
+                "name": "EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "DEFAULTCAPACITY_EMPTY_ELEMENTDATA",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "elementData",
+                "type": "java.lang.Object[]",
+                "nestedTypes": [],
+                "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+              },
+              {
+                "kind": "FIELD",
+                "name": "size",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2"
+              },
+              {
+                "kind": "FIELD",
+                "name": "MAX_ARRAY_SIZE",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "2147483639"
+              },
+              {
+                "kind": "FIELD",
+                "name": "modCount",
+                "type": "int",
+                "nestedTypes": null,
+                "value": "0"
+              }
+            ],
+            "value": "[org.joda.time.tz.DateTimeZoneBuilder$Rule, org.joda.time.tz.DateTimeZoneBuilder$Rule]"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialNameKey",
+            "type": "java.lang.String",
+            "nestedTypes": null,
+            "value": "null"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iInitialSaveMillis",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "0"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperYear",
+            "type": "int",
+            "nestedTypes": null,
+            "value": "2147483647"
+          },
+          {
+            "kind": "FIELD",
+            "name": "iUpperOfYear",
+            "type": "org.joda.time.tz.DateTimeZoneBuilder$OfYear",
+            "nestedTypes": null,
+            "value": "null"
+          }
+        ]
+      }
+    ]
+  }
+]
