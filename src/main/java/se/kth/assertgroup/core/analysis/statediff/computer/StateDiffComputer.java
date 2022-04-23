@@ -123,10 +123,12 @@ public class StateDiffComputer {
                 firstDistinctState = identifyBreakpointDistinctState((JSONObject) jsonStates.get(i),
                         lineToVars.get(lineNumber),
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
+
+                return Pair.of(firstLineWithDistinctState, firstDistinctState);
             }
         }
 
-        return firstDistinctState == null ? null : Pair.of(firstLineWithDistinctState, firstDistinctState);
+        return null;
     }
 
     private String identifyBreakpointDistinctState
@@ -140,10 +142,11 @@ public class StateDiffComputer {
 
         Set<String> distinctVarVals = extractVarVals(valueCollection, lineVars, true);
 
-        for(int ind : oppositeTargetStateIndices){
-            JSONArray oppositeValueCollection = breakpointStateToValueCollection((JSONObject) oppositeJsonStates.get(ind));
-            distinctVarVals.removeAll(extractVarVals(oppositeValueCollection, lineVars, true));
-        }
+        if(oppositeTargetStateIndices != null)
+            for(int ind : oppositeTargetStateIndices){
+                JSONArray oppositeValueCollection = breakpointStateToValueCollection((JSONObject) oppositeJsonStates.get(ind));
+                distinctVarVals.removeAll(extractVarVals(oppositeValueCollection, lineVars, true));
+            }
 
         String shortestDistinctVarVal = null;
 
@@ -178,12 +181,12 @@ public class StateDiffComputer {
             return varVals;
         }
 
-        prefix += valueJo.get("name").toString();
+        prefix += valueJo.get("name").toString() + ".";
         JSONArray nestedTypes = (JSONArray) valueJo.get("nestedTypes");
 
         for(int i = 0; i < nestedTypes.size(); i++){
             JSONObject nestedObj = (JSONObject) nestedTypes.get(i);
-            varVals.addAll(extractVarVals(prefix, valueJo));
+            varVals.addAll(extractVarVals(prefix, nestedObj));
         }
 
         return varVals;
@@ -233,7 +236,7 @@ public class StateDiffComputer {
         return hashedStates;
     }
 
-    // Left of return is the lineNumber and right is the state hash
+    // Left of return is the lineNumber and right is the state hashhash
     private Pair<Integer, Integer> stateJsonToHashedStatePair(JSONObject stateJO) {
         int lineNumber = Integer.parseInt(stateJO.get("lineNumber").toString());
         stateJO = (JSONObject) ((JSONArray) stateJO.get("stackFrameContexts")).get(0);

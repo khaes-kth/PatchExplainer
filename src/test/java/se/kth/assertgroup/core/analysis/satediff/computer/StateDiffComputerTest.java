@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class StateDiffComputerTest {
 
     @Test
@@ -34,5 +36,8 @@ public class StateDiffComputerTest {
                 rightLineToVar);
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
+
+        assertNotNull(stateDiff.getFirstOnlyOriginalState());
+        assertNull(stateDiff.getFirstOnlyPatchedState());
     }
 }
