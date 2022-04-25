@@ -124,7 +124,8 @@ public class StateDiffComputer {
                         lineToVars.get(lineNumber),
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
-                return Pair.of(firstLineWithDistinctState, firstDistinctState);
+                if(firstDistinctState != null)
+                    return Pair.of(firstLineWithDistinctState, firstDistinctState);
             }
         }
 
