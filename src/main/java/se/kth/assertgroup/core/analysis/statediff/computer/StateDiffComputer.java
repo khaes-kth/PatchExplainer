@@ -116,7 +116,7 @@ public class StateDiffComputer {
             int oppositeLineNumber = lineMapping.get(lineNumber);
 
             if (!oppositeLineToStates.containsKey(oppositeLineNumber) ||
-                    oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
+                    !oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
                 // this stateHash is not covered in the opposite version
                 firstLineWithDistinctState = lineNumber;
 
@@ -141,12 +141,14 @@ public class StateDiffComputer {
             ) {
         JSONArray valueCollection = breakpointStateToValueCollection(jsonState);
 
-        Set<String> distinctVarVals = extractVarVals(valueCollection, lineVars, true);
+        List<String> lineVarsLst = lineVars == null ? null : List.of(lineVars.split(";"));
+
+        Set<String> distinctVarVals = extractVarVals(valueCollection, lineVarsLst, true);
 
         if(oppositeTargetStateIndices != null)
             for(int ind : oppositeTargetStateIndices){
                 JSONArray oppositeValueCollection = breakpointStateToValueCollection((JSONObject) oppositeJsonStates.get(ind));
-                distinctVarVals.removeAll(extractVarVals(oppositeValueCollection, lineVars, true));
+                distinctVarVals.removeAll(extractVarVals(oppositeValueCollection, lineVarsLst, true));
             }
 
         String shortestDistinctVarVal = null;
@@ -159,14 +161,14 @@ public class StateDiffComputer {
         return shortestDistinctVarVal;
     }
 
-    private Set<String> extractVarVals(JSONArray valueCollection, String lineVars, boolean checkLineVars) {
+    private Set<String> extractVarVals(JSONArray valueCollection, List<String> lineVarsLst, boolean checkLineVars) {
         Set<String> varVals = new HashSet<>();
 
         for(int i = 0; i < valueCollection.size(); i++){
             JSONObject valueJo = (JSONObject) valueCollection.get(i);
 
             // a variable that is not important in this line should be ignored
-            if(checkLineVars && (lineVars == null || !lineVars.contains(valueJo.get("name").toString())))
+            if(checkLineVars && (lineVarsLst == null || !lineVarsLst.contains(valueJo.get("name").toString())))
                 continue;
 
             varVals.addAll(extractVarVals("", valueJo));
