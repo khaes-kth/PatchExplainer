@@ -1,6 +1,6 @@
 <tr class="js-inline-annotations">
-    <td class="border-top border-bottom" colspan="3" style="max-width: 0">
-        <div class="Details js-details-container position-relative check-annotation check-annotation-warning py-3" id="annotation_1539648942">
+    <td class="border-top border-bottom" style="max-width: 0" colspan="4">
+        <div class="Details js-details-container position-relative check-annotation check-annotation-warning py-3" id="annotation_1539648945">
             <p class="text-small pl-3 mb-2">
   <span class="annotation-octicon text-center d-inline-block">
       <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-alert">
@@ -8,8 +8,7 @@
 </svg>
   </span>
                 <span class="color-fg-muted d-inline-block ml-1">
-    Check warning
-      on line 91 in src/main/java/com/diffmin/util/SpoonUtil.java
+    First state divergence in this method occurs on line #{{line-num}}
   </span>
             </p>
 
@@ -24,17 +23,18 @@
 
             <h4 class="f5 ml-3 mb-2 pl-4 mr-2 flex-shrink-0 d-flex flex-items-center">
                 <img class="avatar mr-2 flex-shrink-0" src="https://avatars.githubusercontent.com/ml/30?s=40&amp;v=4" alt="" width="20" height="20">
-                Codecov <span class="ml-1 text-normal">/ codecov/patch</span>
+                EXEC-DIFF / <span class="ml-1 text-normal"> program state diff --  </span>
+                <a href="{{test-link}}">{{test-name}}</a>
             </h4>
 
             <p class="ml-3 mb-0 pl-4 text-bold d-flex flex-items-center">
     <span class="annotation-title flex-auto pr-2">
-      src/main/java/com/diffmin/util/SpoonUtil.java#L91
+      {{unique-state}}
     </span>
             </p>
 
             <div class="py-2 pl-4 ml-3 overflow-auto">
-                <code><pre>Added line #L91 was not covered by tests</pre></code>
+                <code><pre>The state value above only occurs in the {{unique-state-version}} version.</pre></code>
             </div>
 
 

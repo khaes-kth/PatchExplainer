@@ -36,4 +36,8 @@ public class SrcLineVars {
             lineVars.get(line).add(var.getVariable().getSimpleName());
         });
     }
+
+    public Map<Integer, Set<String>> getLineVars(){
+        return lineVars;
+    }
 }
