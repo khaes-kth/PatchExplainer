@@ -8,7 +8,7 @@
 </svg>
   </span>
                 <span class="color-fg-muted d-inline-block ml-1">
-    First state divergence in this method occurs on line #{{line-num}}
+    First detected variable-value that only appears in the {{unique-state-version}} version occurs on line #{{line-num}}
   </span>
             </p>
 
@@ -23,21 +23,16 @@
 
             <h4 class="f5 ml-3 mb-2 pl-4 mr-2 flex-shrink-0 d-flex flex-items-center">
                 <img class="avatar mr-2 flex-shrink-0" src="https://avatars.githubusercontent.com/ml/30?s=40&amp;v=4" alt="" width="20" height="20">
-                EXEC-DIFF / <span class="ml-1 text-normal"> program state diff --  </span>
+                EXEC-DIFF / <span class="ml-1 text-normal" style="margin-right: 5px"> while running test: </span>
                 <a href="{{test-link}}">{{test-name}}</a>
             </h4>
 
             <p class="ml-3 mb-0 pl-4 text-bold d-flex flex-items-center">
-    <span class="annotation-title flex-auto pr-2">
+    <span class="annotation-title pr-2">
       {{unique-state}}
     </span>
+                only occurs in the {{unique-state-version}} version.
             </p>
-
-            <div class="py-2 pl-4 ml-3 overflow-auto">
-                <code><pre>The state value above only occurs in the {{unique-state-version}} version.</pre></code>
-            </div>
-
-
         </div>
 
     </td>

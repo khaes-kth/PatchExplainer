@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProgramStateDiff {
-    private Pair<Integer, String> firstOnlyOriginalState, firstOnlyPatchedState;
+    private UniqueStateInfo firstOriginalUniqueStateInfo, firstPatchedUniqueStateInfo;
     private Map<Integer, String> onlyOriginalReturnPerLine, onlyPatchedReturnPerLine;
 
     public ProgramStateDiff(){
@@ -30,19 +30,56 @@ public class ProgramStateDiff {
         this.onlyOriginalReturnPerLine = onlyOriginalReturnPerLine;
     }
 
-    public Pair<Integer, String> getFirstOnlyPatchedState() {
-        return firstOnlyPatchedState;
+    public UniqueStateInfo getFirstOriginalUniqueStateInfo() {
+        return firstOriginalUniqueStateInfo;
     }
 
-    public void setFirstOnlyPatchedState(Pair<Integer, String> firstOnlyPatchedState) {
-        this.firstOnlyPatchedState = firstOnlyPatchedState;
+    public void setFirstOriginalUniqueStateInfo(UniqueStateInfo firstOriginalUniqueStateInfo) {
+        this.firstOriginalUniqueStateInfo = firstOriginalUniqueStateInfo;
     }
 
-    public Pair<Integer, String> getFirstOnlyOriginalState() {
-        return firstOnlyOriginalState;
+    public UniqueStateInfo getFirstPatchedUniqueStateInfo() {
+        return firstPatchedUniqueStateInfo;
     }
 
-    public void setFirstOnlyOriginalState(Pair<Integer, String> firstOnlyOriginalState) {
-        this.firstOnlyOriginalState = firstOnlyOriginalState;
+    public void setFirstPatchedUniqueStateInfo(UniqueStateInfo firstPatchedUniqueStateInfo) {
+        this.firstPatchedUniqueStateInfo = firstPatchedUniqueStateInfo;
+    }
+
+    public static class UniqueStateInfo {
+        private Integer firstUniqueStateLine, firstUniqueVarValLine, firstUniqueStateHash;
+        private String firstUniqueVarVal;
+
+        public Integer getFirstUniqueStateLine() {
+            return firstUniqueStateLine;
+        }
+
+        public void setFirstUniqueStateLine(Integer firstUniqueStateLine) {
+            this.firstUniqueStateLine = firstUniqueStateLine;
+        }
+
+        public Integer getFirstUniqueVarValLine() {
+            return firstUniqueVarValLine;
+        }
+
+        public void setFirstUniqueVarValLine(Integer firstUniqueVarValLine) {
+            this.firstUniqueVarValLine = firstUniqueVarValLine;
+        }
+
+        public Integer getFirstUniqueStateHash() {
+            return firstUniqueStateHash;
+        }
+
+        public void setFirstUniqueStateHash(Integer firstUniqueStateHash) {
+            this.firstUniqueStateHash = firstUniqueStateHash;
+        }
+
+        public String getFirstUniqueVarVal() {
+            return firstUniqueVarVal;
+        }
+
+        public void setFirstUniqueVarVal(String firstUniqueVarVal) {
+            this.firstUniqueVarVal = firstUniqueVarVal;
+        }
     }
 }

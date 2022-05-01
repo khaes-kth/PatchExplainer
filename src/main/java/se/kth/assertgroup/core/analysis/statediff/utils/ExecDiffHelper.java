@@ -27,21 +27,23 @@ public class ExecDiffHelper {
                         dstLine = Integer.parseInt(cols.get(2).attr("data-line-number"));
                 leftRightMapping.put(srcLine, dstLine);
                 rightLeftMapping.put(dstLine, srcLine);
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
             }
         });
 
         return Pair.of(leftRightMapping, rightLeftMapping);
     }
 
-    public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff) throws IOException {
+    public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff) throws Exception {
         Element tag = Jsoup.parse(infoHtml, "UTF-8", Parser.xmlParser());
 
         Document doc = Jsoup.parse(ghDiff, "UTF-8");
 
+        doc.outputSettings().prettyPrint(false);
+
         doc.selectFirst("td[data-line-number={line}]".replace("{line}", line.toString())).parent()
                 .appendChild(tag);
 
-        FileUtils.writeStringToFile(ghDiff, doc.toString(), "UTF-8");
+        FileUtils.writeStringToFile(ghDiff, doc.outerHtml(), "UTF-8");
     }
 }

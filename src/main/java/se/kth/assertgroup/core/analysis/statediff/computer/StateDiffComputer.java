@@ -55,17 +55,17 @@ public class StateDiffComputer {
     public ProgramStateDiff computeProgramStateDiff() throws IOException, ParseException {
         ProgramStateDiff programStateDiff = new ProgramStateDiff();
 
-        programStateDiff.setFirstOnlyOriginalState(getFirstDistinctStateOnRelevantLine(leftLineToVars,
+        programStateDiff.setFirstOriginalUniqueStateInfo(getFirstDistinctStateOnRelevantLine(leftLineToVars,
                 leftRightLineMapping, leftBreakPoint, rightBreakPoint));
 
-        programStateDiff.setFirstOnlyPatchedState(getFirstDistinctStateOnRelevantLine(rightLineToVars,
+        programStateDiff.setFirstPatchedUniqueStateInfo(getFirstDistinctStateOnRelevantLine(rightLineToVars,
                 rightLeftLineMapping, rightBreakPoint, leftBreakPoint));
 
         return programStateDiff;
     }
 
     // return first state in @hashes that does not exist in states of the corresponding opposite line
-    private Pair<Integer, String> getFirstDistinctStateOnRelevantLine
+    private ProgramStateDiff.UniqueStateInfo getFirstDistinctStateOnRelevantLine
     (
             Map<Integer, Set<String>> lineToVars,
             Map<Integer, Integer> lineMapping,
@@ -83,8 +83,7 @@ public class StateDiffComputer {
 
         Map<Integer, Set<Integer>> oppositeLineToStates = getLineToStates(oppositeHashes);
 
-        int firstLineWithDistinctState = -1;
-        String firstDistinctState = null;
+        ProgramStateDiff.UniqueStateInfo firstUniqueStateInfo = new ProgramStateDiff.UniqueStateInfo();
         for (int i = 0; i < hashes.size(); i++) {
             Pair<Integer, Integer> p = hashes.get(i);
             int lineNumber = p.getKey(), stateHash = p.getValue();
@@ -97,18 +96,25 @@ public class StateDiffComputer {
             if (!oppositeLineToStates.containsKey(oppositeLineNumber) ||
                     !oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
                 // this stateHash is not covered in the opposite version
-                firstLineWithDistinctState = lineNumber;
 
-                firstDistinctState = identifyBreakpointDistinctState((JSONObject) jsonStates.get(i),
+                if(firstUniqueStateInfo.getFirstUniqueStateHash() == null){
+                    firstUniqueStateInfo.setFirstUniqueStateHash(stateHash);
+                    firstUniqueStateInfo.setFirstUniqueStateLine(lineNumber);
+                }
+
+                String firstDistinctState = identifyBreakpointDistinctState((JSONObject) jsonStates.get(i),
                         lineToVars.get(lineNumber),
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
-                if(firstDistinctState != null)
-                    return Pair.of(firstLineWithDistinctState, firstDistinctState);
+                if(firstDistinctState != null) {
+                    firstUniqueStateInfo.setFirstUniqueVarValLine(lineNumber);
+                    firstUniqueStateInfo.setFirstUniqueVarVal(firstDistinctState);
+                    break;
+                }
             }
         }
 
-        return null;
+        return firstUniqueStateInfo;
     }
 
     private String identifyBreakpointDistinctState

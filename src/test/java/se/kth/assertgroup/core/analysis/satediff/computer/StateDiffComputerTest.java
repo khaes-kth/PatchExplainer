@@ -48,8 +48,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertNotNull(stateDiff.getFirstOnlyOriginalState().getValue().toString().equals("id=\"TestDTZ1\""));
-        assertNull(stateDiff.getFirstOnlyPatchedState());
+        assertNotNull(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal().equals("id=\"TestDTZ1\""));
+        assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
     }
 
     // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/1c04679173a46faa59e73f68def33f60843f8beb, depth=1
@@ -81,8 +81,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertNull(stateDiff.getFirstOnlyOriginalState());
-        assertNull(stateDiff.getFirstOnlyPatchedState());
+        assertNull(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
+        assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
     }
 
     // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/8b5b580751d1c08eb848e389ec3e7e235eea62d8, depth=1
@@ -115,8 +115,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals(stateDiff.getFirstOnlyOriginalState().getValue(), "id=\"TestDTZ1\"");
-        assertEquals(stateDiff.getFirstOnlyPatchedState().getValue(), "next.iWallOffset=3600000");
+        assertEquals(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal(), "id=\"TestDTZ1\"");
+        assertEquals(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal(), "next.iWallOffset=3600000");
     }
 
     private Map<Integer, Set<String>> readLineVarsFromFile(File lineVarsFile) throws IOException {

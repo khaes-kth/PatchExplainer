@@ -7,8 +7,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 import se.kth.assertgroup.core.analysis.statediff.models.SelectedTest;
+import se.kth.assertgroup.core.analysis.statediff.models.SrcLineVars;
 import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
@@ -26,70 +28,67 @@ public class StateDiffUIManipulator {
                     File rightReturn,
                     File srcFile,
                     File dstFile,
-                    File ghFullDiff
-            ) throws IOException, ParseException {
-//        Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = ExecDiffHelper.getMappingFromExecDiff(ghFullDiff);
-//
-//        SrcLineVars srcLineVars = new SrcLineVars(srcFile), dstLineVars = new SrcLineVars(dstFile);
-//
-//        StateDiffComputer sdc = new StateDiffComputer(leftBreakPoint, rightBreakPoint, leftReturn, rightReturn,
-//                mappings.getLeft(), mappings.getRight(), srcLineVars.getLineVars(), dstLineVars.getLineVars());
-//
-//        ProgramStateDiff psd = sdc.computeProgramStateDiff();
+                    File ghFullDiff,
+                    String testName,
+                    String testLink
+            ) throws Exception {
+        Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = ExecDiffHelper.getMappingFromExecDiff(ghFullDiff);
 
-        ProgramStateDiff psd = new ProgramStateDiff();
-        psd.setFirstOnlyOriginalState(Pair.of(372, "id=\"TestDTZ1\""));
-        psd.setFirstOnlyPatchedState(Pair.of(369, "next.iWallOffset=3600000"));
+        SrcLineVars srcLineVars = new SrcLineVars(srcFile), dstLineVars = new SrcLineVars(dstFile);
 
-        addStateDiffToExecDiffUI(psd, ghFullDiff, null,
-                new SelectedTest("org.joda.time.TestPartial_Basics::testWith_baseAndArgHaveNoRange",
-                        "http://example.com"));
+        StateDiffComputer sdc = new StateDiffComputer(leftBreakPoint, rightBreakPoint, leftReturn, rightReturn,
+                mappings.getLeft(), mappings.getRight(), srcLineVars.getLineVars(), dstLineVars.getLineVars());
+
+        ProgramStateDiff psd = sdc.computeProgramStateDiff();
+
+//        ProgramStateDiff psd = new ProgramStateDiff();
+//        psd.setFirstOnlyOriginalState(Pair.of(372, "id=\"TestDTZ1\""));
+//        psd.setFirstOnlyPatchedState(Pair.of(369, "next.iWallOffset=3600000"));
+
+        addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink));
     }
 
     private void addStateDiffToExecDiffUI
             (
                     ProgramStateDiff stateDiff,
                     File ghFullDiff,
-                    Map<Integer, Integer> lineMapping,
                     SelectedTest test
             )
-            throws IOException {
-        String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
-        Pair<Integer, String> toBeShownDiff = stateDiff.getFirstOnlyPatchedState();
-        String uniqueStateVersion = "original";
-//        Pair<Integer, String> toBeShownDiff = null;
-//        if(stateDiff.getFirstOnlyOriginalState() == null) {
-//            if(stateDiff.getFirstOnlyPatchedState() != null){
-//                toBeShownDiff = stateDiff.getFirstOnlyPatchedState();
-//            }
-//        }else{
-//            if(stateDiff.getFirstOnlyPatchedState() == null) {
-//                toBeShownDiff = stateDiff.getFirstOnlyOriginalState();
-//            }else{
-//                int originalLine = stateDiff.getFirstOnlyOriginalState().getKey();
-//                if(lineMapping.get(originalLine) < stateDiff.getFirstOnlyPatchedState())
-//            }
-//        }
-        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", toBeShownDiff.getKey().toString())
-                .replace("{{test-link}}", test.getTestLink())
-                .replace("{{test-name}}", test.getTestName())
-                .replace("{{unique-state}}", toBeShownDiff.getValue())
-                .replace("{{unique-state-version}}", uniqueStateVersion);
+            throws Exception {
+        if(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateInfo(), "patched", ghFullDiff, test);
+        }
 
-        Element tag = Jsoup.parse(stateDiffHtml, "UTF-8", Parser.xmlParser());
-
-        Document doc = Jsoup.parse(ghFullDiff, "UTF-8");
-
-        ExecDiffHelper.addLineInfoAfter(toBeShownDiff.getKey(), stateDiffHtml, ghFullDiff);
+        if(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateInfo(), "original", ghFullDiff, test);
+        }
     }
 
-    public static void main(String[] args) throws IOException, ParseException {
+    private void addStateDiffToExecDiffUI
+            (
+                    ProgramStateDiff.UniqueStateInfo toBeShownDiff,
+                    String versionName,
+                    File ghFullDiff,
+                    SelectedTest test
+            ) throws Exception {
+        String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
+        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", toBeShownDiff.getFirstUniqueVarValLine().toString())
+                .replace("{{test-link}}", test.getTestLink())
+                .replace("{{test-name}}", test.getTestName())
+                .replace("{{unique-state}}", toBeShownDiff.getFirstUniqueVarVal())
+                .replace("{{unique-state-version}}", versionName);
+        ExecDiffHelper.addLineInfoAfter(toBeShownDiff.getFirstUniqueVarValLine(), stateDiffHtml, ghFullDiff);
+    }
+
+    public static void main(String[] args) throws Exception {
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
                 new File("src/test/resources/sahab_reports/simple_two/breakpoint/left.json"),
                 new File("src/test/resources/sahab_reports/simple_two/breakpoint/right.json"),
                 null, null,
                 new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"));
+                new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"),
+                "org.joda.time.TestPartial_Basics::testWith_baseAndArgHaveNoRange",
+                "http://example.com");
     }
 }
