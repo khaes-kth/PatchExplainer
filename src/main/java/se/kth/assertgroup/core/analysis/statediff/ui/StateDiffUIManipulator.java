@@ -2,11 +2,6 @@ package se.kth.assertgroup.core.analysis.statediff.ui;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.json.simple.parser.ParseException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 import se.kth.assertgroup.core.analysis.statediff.models.SelectedTest;
@@ -14,7 +9,6 @@ import se.kth.assertgroup.core.analysis.statediff.models.SrcLineVars;
 import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 public class StateDiffUIManipulator {
@@ -53,18 +47,18 @@ public class StateDiffUIManipulator {
                     SelectedTest test
             )
             throws Exception {
-        if(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateInfo(), "original", ghFullDiff, test);
+        if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary(), "original", ghFullDiff, test);
         }
 
-        if(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateInfo(), "patched", ghFullDiff, test);
+        if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary(), "patched", ghFullDiff, test);
         }
     }
 
     private void addStateDiffToExecDiffUI
             (
-                    ProgramStateDiff.UniqueStateInfo toBeShownDiff,
+                    ProgramStateDiff.UniqueStateSummary toBeShownDiff,
                     String versionName,
                     File ghFullDiff,
                     SelectedTest test

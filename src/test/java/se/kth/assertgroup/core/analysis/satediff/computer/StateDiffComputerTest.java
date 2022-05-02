@@ -4,10 +4,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
-import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class StateDiffComputerTest<R> {
 
-    // breakpoint from https://github.com/khaes-kth/drr-execdiff/commit/649e9234549d2c74f1279499011da87638c2d718, depth=3
+    // data from https://github.com/khaes-kth/drr-execdiff/commit/649e9234549d2c74f1279499011da87638c2d718, depth=3
     @Test
     void computeStateDiff_simple_diffIsGenerated() throws IOException, ParseException {
         Path simpleSahabDirectory = Paths.get("src/test/resources/sahab_reports/simple");
@@ -44,8 +42,12 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals("iRules.size=2", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
-        assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
+        assertEquals("RETURN.UTC.iID=UTC", stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal());
+        assertEquals("RETURN=null", stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal());
+
+
+        assertEquals("iRules.size=2", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());
+        assertNull(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal());
     }
 
     // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/1c04679173a46faa59e73f68def33f60843f8beb
@@ -74,8 +76,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals("tailZone.iID=TestDTZ1", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
-        assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
+        assertEquals("tailZone.iID=TestDTZ1", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());
+        assertNull(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal());
     }
 
     // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/8b5b580751d1c08eb848e389ec3e7e235eea62d8, depth=1
@@ -104,8 +106,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals("id=TestDTZ1", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
-        assertEquals("next.iWallOffset=3600000", stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
+        assertEquals("id=TestDTZ1", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());
+        assertEquals("next.iWallOffset=3600000", stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal());
     }
 
     private Map<Integer, Set<String>> readLineVarsFromFile(File lineVarsFile) throws IOException {

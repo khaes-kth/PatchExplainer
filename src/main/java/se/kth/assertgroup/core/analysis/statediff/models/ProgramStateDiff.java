@@ -1,50 +1,79 @@
 package se.kth.assertgroup.core.analysis.statediff.models;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ProgramStateDiff {
-    private UniqueStateInfo firstOriginalUniqueStateInfo, firstPatchedUniqueStateInfo;
-    private Map<Integer, String> onlyOriginalReturnPerLine, onlyPatchedReturnPerLine;
+    private UniqueStateSummary firstOriginalUniqueStateSummary, firstPatchedUniqueStateSummary;
+    private UniqueReturnSummary originalUniqueReturn, patchedUniqueReturn;
 
-    public ProgramStateDiff(){
-        onlyOriginalReturnPerLine = new HashMap<>();
-        onlyPatchedReturnPerLine = new HashMap<>();
+    public UniqueStateSummary getFirstOriginalUniqueStateSummary() {
+        return firstOriginalUniqueStateSummary;
     }
 
-    public Map<Integer, String> getOnlyPatchedReturnPerLine() {
-        return onlyPatchedReturnPerLine;
+    public void setFirstOriginalUniqueStateSummary(UniqueStateSummary firstOriginalUniqueStateSummary) {
+        this.firstOriginalUniqueStateSummary = firstOriginalUniqueStateSummary;
     }
 
-    public void setOnlyPatchedReturnPerLine(Map<Integer, String> onlyPatchedReturnPerLine) {
-        this.onlyPatchedReturnPerLine = onlyPatchedReturnPerLine;
+    public UniqueStateSummary getFirstPatchedUniqueStateSummary() {
+        return firstPatchedUniqueStateSummary;
     }
 
-    public Map<Integer, String> getOnlyOriginalReturnPerLine() {
-        return onlyOriginalReturnPerLine;
+    public void setFirstPatchedUniqueStateSummary(UniqueStateSummary firstPatchedUniqueStateSummary) {
+        this.firstPatchedUniqueStateSummary = firstPatchedUniqueStateSummary;
     }
 
-    public void setOnlyOriginalReturnPerLine(Map<Integer, String> onlyOriginalReturnPerLine) {
-        this.onlyOriginalReturnPerLine = onlyOriginalReturnPerLine;
+    public UniqueReturnSummary getOriginalUniqueReturn() {
+        return originalUniqueReturn;
     }
 
-    public UniqueStateInfo getFirstOriginalUniqueStateInfo() {
-        return firstOriginalUniqueStateInfo;
+    public void setOriginalUniqueReturn(UniqueReturnSummary originalUniqueReturn) {
+        this.originalUniqueReturn = originalUniqueReturn;
     }
 
-    public void setFirstOriginalUniqueStateInfo(UniqueStateInfo firstOriginalUniqueStateInfo) {
-        this.firstOriginalUniqueStateInfo = firstOriginalUniqueStateInfo;
+    public UniqueReturnSummary getPatchedUniqueReturn() {
+        return patchedUniqueReturn;
     }
 
-    public UniqueStateInfo getFirstPatchedUniqueStateInfo() {
-        return firstPatchedUniqueStateInfo;
+    public void setPatchedUniqueReturn(UniqueReturnSummary patchedUniqueReturn) {
+        this.patchedUniqueReturn = patchedUniqueReturn;
     }
 
-    public void setFirstPatchedUniqueStateInfo(UniqueStateInfo firstPatchedUniqueStateInfo) {
-        this.firstPatchedUniqueStateInfo = firstPatchedUniqueStateInfo;
+    public static class UniqueReturnSummary {
+        private Integer firstUniqueVarValLine, firstUniqueReturnLine, firstUniqueReturnHash;
+        private String firstUniqueVarVal;
+
+        public Integer getFirstUniqueVarValLine() {
+            return firstUniqueVarValLine;
+        }
+
+        public void setFirstUniqueVarValLine(Integer firstUniqueVarValLine) {
+            this.firstUniqueVarValLine = firstUniqueVarValLine;
+        }
+
+        public String getFirstUniqueVarVal() {
+            return firstUniqueVarVal;
+        }
+
+        public void setFirstUniqueVarVal(String firstUniqueVarVal) {
+            this.firstUniqueVarVal = firstUniqueVarVal;
+        }
+
+        public Integer getFirstUniqueReturnHash() {
+            return firstUniqueReturnHash;
+        }
+
+        public void setFirstUniqueReturnHash(Integer firstUniqueReturnHash) {
+            this.firstUniqueReturnHash = firstUniqueReturnHash;
+        }
+
+        public Integer getFirstUniqueReturnLine() {
+            return firstUniqueReturnLine;
+        }
+
+        public void setFirstUniqueReturnLine(Integer firstUniqueReturnLine) {
+            this.firstUniqueReturnLine = firstUniqueReturnLine;
+        }
     }
 
-    public static class UniqueStateInfo {
+    public static class UniqueStateSummary {
         private Integer firstUniqueStateLine, firstUniqueVarValLine, firstUniqueStateHash;
         private String firstUniqueVarVal;
 

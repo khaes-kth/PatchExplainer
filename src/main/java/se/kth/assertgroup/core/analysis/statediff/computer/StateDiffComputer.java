@@ -1,6 +1,5 @@
 package se.kth.assertgroup.core.analysis.statediff.computer;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -9,11 +8,9 @@ import org.json.simple.parser.ParseException;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class StateDiffComputer {
     private File leftSahabReport, rightSahabReport;
@@ -41,17 +38,82 @@ public class StateDiffComputer {
     public ProgramStateDiff computeProgramStateDiff() throws IOException, ParseException {
         ProgramStateDiff programStateDiff = new ProgramStateDiff();
 
-        programStateDiff.setFirstOriginalUniqueStateInfo(getFirstDistinctStateOnRelevantLine(leftLineToVars,
+        programStateDiff.setFirstOriginalUniqueStateSummary(getFirstDistinctStateOnRelevantLine(leftLineToVars,
                 leftRightLineMapping, leftSahabReport, rightSahabReport));
 
-        programStateDiff.setFirstPatchedUniqueStateInfo(getFirstDistinctStateOnRelevantLine(rightLineToVars,
+        programStateDiff.setFirstPatchedUniqueStateSummary(getFirstDistinctStateOnRelevantLine(rightLineToVars,
                 rightLeftLineMapping, rightSahabReport, leftSahabReport));
+
+        programStateDiff.setOriginalUniqueReturn(getFirstUniqueReturn(leftRightLineMapping, leftSahabReport, rightSahabReport));
+        programStateDiff.setPatchedUniqueReturn(getFirstUniqueReturn(rightLeftLineMapping, rightSahabReport, leftSahabReport));
 
         return programStateDiff;
     }
 
+    private ProgramStateDiff.UniqueReturnSummary getFirstUniqueReturn
+            (
+                    Map<Integer, Integer> lineMapping,
+                    File sahabReportFile,
+                    File oppositeSahabReportFile
+            ) throws IOException, ParseException {
+        JSONParser parser = new JSONParser();
+        JSONArray jsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(sahabReportFile))).get("return"),
+                oppositeJsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(oppositeSahabReportFile))).get("return");
+
+        List<Pair<Integer, Integer>> hashes = getHashedReturnStates(jsonStates),
+                oppositeHashes = getHashedReturnStates(oppositeJsonStates);
+
+        Map<Integer, List<Integer>> oppositeLineToStateIndices = getLineToStateIndices(oppositeHashes);
+
+        Map<Integer, Set<Integer>> oppositeLineToStates = getLineToStates(oppositeHashes);
+
+        ProgramStateDiff.UniqueReturnSummary firstUniqueReturnSummary = new ProgramStateDiff.UniqueReturnSummary();
+
+        for (int i = 0; i < hashes.size(); i++) {
+            Pair<Integer, Integer> p = hashes.get(i);
+            int lineNumber = p.getKey(), stateHash = p.getValue();
+
+            if (!lineMapping.containsKey(lineNumber))
+                continue;
+
+            int oppositeLineNumber = lineMapping.get(lineNumber);
+
+            if (!oppositeLineToStates.containsKey(oppositeLineNumber) ||
+                    !oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
+                // this stateHash is not covered in the opposite version
+
+                if (firstUniqueReturnSummary.getFirstUniqueReturnHash() == null) {
+                    firstUniqueReturnSummary.setFirstUniqueReturnHash(stateHash);
+                    firstUniqueReturnSummary.setFirstUniqueReturnLine(lineNumber);
+                }
+
+                String firstDistinctVarVal = identifyDistinctReturnVarVal((JSONObject) jsonStates.get(i),
+                        oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
+
+                if (firstDistinctVarVal != null) {
+                    firstUniqueReturnSummary.setFirstUniqueVarValLine(lineNumber);
+                    firstUniqueReturnSummary.setFirstUniqueVarVal(firstDistinctVarVal);
+                    break;
+                }
+            }
+        }
+
+        return firstUniqueReturnSummary;
+    }
+
+    private List<Pair<Integer, Integer>> getHashedReturnStates(JSONArray ja){
+        List<Pair<Integer, Integer>> hashes = new ArrayList<>();
+
+        for(int i = 0; i < ja.size(); i++){
+            JSONObject jo = (JSONObject) ja.get(i);
+            hashes.add(returnStateJsonToHash(jo));
+        }
+
+        return hashes;
+    }
+
     // return first state in @hashes that does not exist in states of the corresponding opposite line
-    private ProgramStateDiff.UniqueStateInfo getFirstDistinctStateOnRelevantLine
+    private ProgramStateDiff.UniqueStateSummary getFirstDistinctStateOnRelevantLine
     (
             Map<Integer, Set<String>> lineToVars,
             Map<Integer, Integer> lineMapping,
@@ -69,7 +131,7 @@ public class StateDiffComputer {
 
         Map<Integer, Set<Integer>> oppositeLineToStates = getLineToStates(oppositeHashes);
 
-        ProgramStateDiff.UniqueStateInfo firstUniqueStateInfo = new ProgramStateDiff.UniqueStateInfo();
+        ProgramStateDiff.UniqueStateSummary firstUniqueStateSummary = new ProgramStateDiff.UniqueStateSummary();
         for (int i = 0; i < hashes.size(); i++) {
             Pair<Integer, Integer> p = hashes.get(i);
             int lineNumber = p.getKey(), stateHash = p.getValue();
@@ -83,27 +145,59 @@ public class StateDiffComputer {
                     !oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
                 // this stateHash is not covered in the opposite version
 
-                if (firstUniqueStateInfo.getFirstUniqueStateHash() == null) {
-                    firstUniqueStateInfo.setFirstUniqueStateHash(stateHash);
-                    firstUniqueStateInfo.setFirstUniqueStateLine(lineNumber);
+                if (firstUniqueStateSummary.getFirstUniqueStateHash() == null) {
+                    firstUniqueStateSummary.setFirstUniqueStateHash(stateHash);
+                    firstUniqueStateSummary.setFirstUniqueStateLine(lineNumber);
                 }
 
-                String firstDistinctState = identifyBreakpointDistinctState((JSONObject) jsonStates.get(i),
+                String firstDistinctVarVal = identifyDistinctBreakpointVarVal((JSONObject) jsonStates.get(i),
                         lineToVars.get(lineNumber),
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
-                if (firstDistinctState != null) {
-                    firstUniqueStateInfo.setFirstUniqueVarValLine(lineNumber);
-                    firstUniqueStateInfo.setFirstUniqueVarVal(firstDistinctState);
+                if (firstDistinctVarVal != null) {
+                    firstUniqueStateSummary.setFirstUniqueVarValLine(lineNumber);
+                    firstUniqueStateSummary.setFirstUniqueVarVal(firstDistinctVarVal);
                     break;
                 }
             }
         }
 
-        return firstUniqueStateInfo;
+        return firstUniqueStateSummary;
     }
 
-    private String identifyBreakpointDistinctState
+    private String identifyDistinctReturnVarVal
+            (
+                    JSONObject jsonState,
+                    JSONArray oppositeJsonStates,
+                    List<Integer> oppositeTargetStateIndices
+            ) throws IOException {
+        Set<String> distinctVarVals = extractVarVals("RETURN", jsonState);
+
+        if (oppositeTargetStateIndices != null)
+            for (int ind : oppositeTargetStateIndices) {
+                JSONObject oppositeState = ((JSONObject) oppositeJsonStates.get(ind));
+                distinctVarVals.removeAll(extractVarVals("RETURN", oppositeState));
+            }
+
+        String shortestDistinctVarVal = null;
+
+        for (String varVal : distinctVarVals) {
+            if (shortestDistinctVarVal == null)
+                shortestDistinctVarVal = varVal;
+            else{
+                int shortestLen = shortestDistinctVarVal.length(),
+                        shortestParts = shortestDistinctVarVal.split("=")[0].split(".").length,
+                        curParts = varVal.split("=")[0].split(".").length, curLen = varVal.length();
+
+                if(shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
+                    shortestDistinctVarVal = varVal;
+            }
+        }
+
+        return shortestDistinctVarVal;
+    }
+
+    private String identifyDistinctBreakpointVarVal
             (
                     JSONObject jsonState,
                     Set<String> lineVars,
@@ -221,18 +315,24 @@ public class StateDiffComputer {
 
         for (int i = 0; i < ja.size(); i++) {
             JSONObject jo = (JSONObject) ja.get(i);
-            hashedStates.add(stateJsonToHashedStatePair(jo));
+            hashedStates.add(breakpointStateJsonToHashedStatePair(jo));
         }
 
         return hashedStates;
     }
 
     // Left of return is the lineNumber and right is the state hashhash
-    private Pair<Integer, Integer> stateJsonToHashedStatePair(JSONObject stateJO) {
+    private Pair<Integer, Integer> breakpointStateJsonToHashedStatePair(JSONObject stateJO) {
         int lineNumber = Integer.parseInt(stateJO.get("lineNumber").toString());
         stateJO = (JSONObject) ((JSONArray) stateJO.get("stackFrameContexts")).get(0);
         return Pair.of(lineNumber,
                 stateJO.get("runtimeValueCollection").toString().hashCode());
+    }
+
+    private Pair<Integer, Integer> returnStateJsonToHash(JSONObject stateJO){
+        int lineNumber = Integer.parseInt(stateJO.get("location").toString().split(":")[1]);
+        return Pair.of(lineNumber,
+                ("" + stateJO.get("fields") + stateJO.get("value") + stateJO.get("arrayElements")).hashCode());
     }
 
 }
