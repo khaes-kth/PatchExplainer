@@ -16,36 +16,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class StateDiffComputer {
-
-    /* Required formatting for the following files
-    lineMapping:
-    x,y
-    ...
-
-    lineToVars:
-    x,var1;var2;...
-    ...
-     */
-    private File leftBreakPoint, rightBreakPoint, leftReturn, rightReturn;
+    private File leftSahabReport, rightSahabReport;
 
     private Map<Integer, Integer> leftRightLineMapping, rightLeftLineMapping;
     private Map<Integer, Set<String>> leftLineToVars, rightLineToVars;
 
     public StateDiffComputer
             (
-                    File leftBreakPoint,
-                    File rightBreakPoint,
-                    File leftReturn,
-                    File rightReturn,
+                    File leftSahabReport,
+                    File rightSahabReport,
                     Map<Integer, Integer> leftRightLineMapping,
                     Map<Integer, Integer> rightLeftLineMapping,
                     Map<Integer, Set<String>> leftLineToVars,
                     Map<Integer, Set<String>> rightLineToVars
             ) throws IOException {
-        this.leftBreakPoint = leftBreakPoint;
-        this.rightBreakPoint = rightBreakPoint;
-        this.leftReturn = leftReturn;
-        this.rightReturn = rightReturn;
+        this.leftSahabReport = leftSahabReport;
+        this.rightSahabReport = rightSahabReport;
         this.leftLineToVars = leftLineToVars;
         this.rightLineToVars = rightLineToVars;
         this.leftRightLineMapping = leftRightLineMapping;
@@ -56,10 +42,10 @@ public class StateDiffComputer {
         ProgramStateDiff programStateDiff = new ProgramStateDiff();
 
         programStateDiff.setFirstOriginalUniqueStateInfo(getFirstDistinctStateOnRelevantLine(leftLineToVars,
-                leftRightLineMapping, leftBreakPoint, rightBreakPoint));
+                leftRightLineMapping, leftSahabReport, rightSahabReport));
 
         programStateDiff.setFirstPatchedUniqueStateInfo(getFirstDistinctStateOnRelevantLine(rightLineToVars,
-                rightLeftLineMapping, rightBreakPoint, leftBreakPoint));
+                rightLeftLineMapping, rightSahabReport, leftSahabReport));
 
         return programStateDiff;
     }
@@ -69,12 +55,12 @@ public class StateDiffComputer {
     (
             Map<Integer, Set<String>> lineToVars,
             Map<Integer, Integer> lineMapping,
-            File breakpointFile,
-            File oppositeBreakpointFile
+            File sahabReportFile,
+            File oppositeSahabReportFile
     ) throws IOException, ParseException {
         JSONParser parser = new JSONParser();
-        JSONArray jsonStates = (JSONArray) parser.parse(new FileReader(breakpointFile)),
-                oppositeJsonStates = (JSONArray) parser.parse(new FileReader(oppositeBreakpointFile));
+        JSONArray jsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(sahabReportFile))).get("breakpoint"),
+                oppositeJsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(oppositeSahabReportFile))).get("breakpoint");
 
         List<Pair<Integer, Integer>> hashes = getHashedBreakpointStates(jsonStates),
                 oppositeHashes = getHashedBreakpointStates(oppositeJsonStates);
@@ -97,7 +83,7 @@ public class StateDiffComputer {
                     !oppositeLineToStates.get(oppositeLineNumber).contains(stateHash)) {
                 // this stateHash is not covered in the opposite version
 
-                if(firstUniqueStateInfo.getFirstUniqueStateHash() == null){
+                if (firstUniqueStateInfo.getFirstUniqueStateHash() == null) {
                     firstUniqueStateInfo.setFirstUniqueStateHash(stateHash);
                     firstUniqueStateInfo.setFirstUniqueStateLine(lineNumber);
                 }
@@ -106,7 +92,7 @@ public class StateDiffComputer {
                         lineToVars.get(lineNumber),
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
-                if(firstDistinctState != null) {
+                if (firstDistinctState != null) {
                     firstUniqueStateInfo.setFirstUniqueVarValLine(lineNumber);
                     firstUniqueStateInfo.setFirstUniqueVarVal(firstDistinctState);
                     break;
@@ -123,35 +109,43 @@ public class StateDiffComputer {
                     Set<String> lineVars,
                     JSONArray oppositeJsonStates,
                     List<Integer> oppositeTargetStateIndices
-            ) {
+            ) throws IOException {
         JSONArray valueCollection = breakpointStateToValueCollection(jsonState);
 
         Set<String> distinctVarVals = extractVarVals(valueCollection, lineVars, true);
 
-        if(oppositeTargetStateIndices != null)
-            for(int ind : oppositeTargetStateIndices){
+        if (oppositeTargetStateIndices != null)
+            for (int ind : oppositeTargetStateIndices) {
                 JSONArray oppositeValueCollection = breakpointStateToValueCollection((JSONObject) oppositeJsonStates.get(ind));
                 distinctVarVals.removeAll(extractVarVals(oppositeValueCollection, lineVars, true));
             }
 
         String shortestDistinctVarVal = null;
 
-        for(String varVal : distinctVarVals){
-            if(shortestDistinctVarVal == null || shortestDistinctVarVal.length()> varVal.length())
+        for (String varVal : distinctVarVals) {
+            if (shortestDistinctVarVal == null)
                 shortestDistinctVarVal = varVal;
+            else{
+                int shortestLen = shortestDistinctVarVal.length(),
+                        shortestParts = shortestDistinctVarVal.split(".").length,
+                        curParts = varVal.split(".").length, curLen = varVal.length();
+
+                if(shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
+                    shortestDistinctVarVal = varVal;
+            }
         }
 
         return shortestDistinctVarVal;
     }
 
-    private Set<String> extractVarVals(JSONArray valueCollection, Set<String> lineVarsLst, boolean checkLineVars) {
+    private Set<String> extractVarVals(JSONArray valueCollection, Set<String> lineVarsLst, boolean checkLineVars) throws IOException {
         Set<String> varVals = new HashSet<>();
 
-        for(int i = 0; i < valueCollection.size(); i++){
+        for (int i = 0; i < valueCollection.size(); i++) {
             JSONObject valueJo = (JSONObject) valueCollection.get(i);
 
             // a variable that is not important in this line should be ignored
-            if(checkLineVars && (lineVarsLst == null || !lineVarsLst.contains(valueJo.get("name").toString())))
+            if (checkLineVars && (lineVarsLst == null || !lineVarsLst.contains(valueJo.get("name").toString())))
                 continue;
 
             varVals.addAll(extractVarVals("", valueJo));
@@ -159,26 +153,37 @@ public class StateDiffComputer {
         return varVals;
     }
 
-    private Set<String> extractVarVals(String prefix, JSONObject valueJo){
+    private Set<String> extractVarVals(String prefix, JSONObject valueJo) throws IOException {
         Set<String> varVals = new HashSet<>();
-        if(valueJo.get("nestedTypes") == null || ((JSONArray) valueJo.get("nestedTypes")).size() == 0){
-            // it's a leaf node
-            varVals.add(prefix + valueJo.get("name") + "=" + valueJo.get("value").toString());
-            return varVals;
+        if (valueJo.get("fields") != null && ((JSONArray) valueJo.get("fields")).size() > 0) {
+            prefix += (valueJo.containsKey("name") ? valueJo.get("name") : "").toString() + ".";
+            JSONArray nestedTypes = (JSONArray) valueJo.get("fields");
+
+            for (int i = 0; i < nestedTypes.size(); i++) {
+                JSONObject nestedObj = (JSONObject) nestedTypes.get(i);
+                varVals.addAll(extractVarVals(prefix, nestedObj));
+            }
+        } else if (valueJo.get("arrayElements") != null && ((JSONArray) valueJo.get("arrayElements")).size() > 0) {
+            JSONArray nestedTypes = (JSONArray) valueJo.get("arrayElements");
+
+            prefix += (valueJo.containsKey("name") ? valueJo.get("name") : "").toString();
+
+            for (int i = 0; i < nestedTypes.size(); i++) {
+                JSONObject nestedObj = (JSONObject) nestedTypes.get(i);
+                String currentPrefix = prefix + "[" + i + "]";
+                varVals.addAll(extractVarVals(currentPrefix, nestedObj));
+            }
         }
-
-        prefix += valueJo.get("name").toString() + ".";
-        JSONArray nestedTypes = (JSONArray) valueJo.get("nestedTypes");
-
-        for(int i = 0; i < nestedTypes.size(); i++){
-            JSONObject nestedObj = (JSONObject) nestedTypes.get(i);
-            varVals.addAll(extractVarVals(prefix, nestedObj));
+        else {
+            // it's a leaf node
+            String currentPrefix = prefix + (valueJo.containsKey("name") ? valueJo.get("name") : "");
+            varVals.add(currentPrefix + "=" + valueJo.get("value"));
         }
 
         return varVals;
     }
 
-    private JSONArray breakpointStateToValueCollection(JSONObject state){
+    private JSONArray breakpointStateToValueCollection(JSONObject state) {
         return (JSONArray) ((JSONObject) ((JSONArray)
                 state.get("stackFrameContexts")).get(0)).get("runtimeValueCollection");
     }
@@ -230,35 +235,4 @@ public class StateDiffComputer {
                 stateJO.get("runtimeValueCollection").toString().hashCode());
     }
 
-    public File getRightBreakPoint() {
-        return rightBreakPoint;
-    }
-
-    public void setRightBreakPoint(File rightBreakPoint) {
-        this.rightBreakPoint = rightBreakPoint;
-    }
-
-    public File getLeftBreakPoint() {
-        return leftBreakPoint;
-    }
-
-    public void setLeftBreakPoint(File leftBreakPoint) {
-        this.leftBreakPoint = leftBreakPoint;
-    }
-
-    public File getRightReturn() {
-        return rightReturn;
-    }
-
-    public void setRightReturn(File rightReturn) {
-        this.rightReturn = rightReturn;
-    }
-
-    public File getLeftReturn() {
-        return leftReturn;
-    }
-
-    public void setLeftReturn(File leftReturn) {
-        this.leftReturn = leftReturn;
-    }
 }

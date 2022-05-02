@@ -19,14 +19,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class StateDiffComputerTest<R> {
 
-    // breakpoint from https://github.com/khaes-kth/drr-execdiff/commit/649e9234549d2c74f1279499011da87638c2d718
+    // breakpoint from https://github.com/khaes-kth/drr-execdiff/commit/649e9234549d2c74f1279499011da87638c2d718, depth=3
     @Test
     void computeStateDiff_simple_diffIsGenerated() throws IOException, ParseException {
         Path simpleSahabDirectory = Paths.get("src/test/resources/sahab_reports/simple");
-        File leftBreakpoint = simpleSahabDirectory.resolve("breakpoint/left.json").toFile(),
-                rightBreakpoint = simpleSahabDirectory.resolve("breakpoint/right.json").toFile(),
-                leftReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
-                rightReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
+        File leftSahabReport = simpleSahabDirectory.resolve("report/left.json").toFile(),
+                rightSahabReport = simpleSahabDirectory.resolve("report/right.json").toFile(),
                 lineMapping = simpleSahabDirectory.resolve("project_data/line_mapping.csv").toFile(),
                 leftLineToVarFile = simpleSahabDirectory.resolve("project_data/left_line_to_var.csv").toFile(),
                 rightLineToVarFile = simpleSahabDirectory.resolve("project_data/right_line_to_var.csv").toFile();
@@ -37,10 +35,8 @@ public class StateDiffComputerTest<R> {
         Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = readMappingsFromFile(lineMapping);
 
         StateDiffComputer sdc = new StateDiffComputer(
-                leftBreakpoint,
-                rightBreakpoint,
-                leftReturn,
-                rightReturn,
+                leftSahabReport,
+                rightSahabReport,
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
@@ -48,18 +44,17 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertNotNull(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal().equals("id=\"TestDTZ1\""));
+        assertEquals("iRules.size=2", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
         assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
     }
 
-    // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/1c04679173a46faa59e73f68def33f60843f8beb, depth=1
+    // breakpoint from: https://github.com/khaes-kth/drr-execdiff/commit/1c04679173a46faa59e73f68def33f60843f8beb
+    // only a part of breakpoint data is stored in right.json
     @Test
     void computeStateDiff_complex_diffIsGenerated() throws IOException, ParseException {
         Path simpleSahabDirectory = Paths.get("src/test/resources/sahab_reports/complex");
-        File leftBreakpoint = simpleSahabDirectory.resolve("breakpoint/left.json").toFile(),
-                rightBreakpoint = simpleSahabDirectory.resolve("breakpoint/right.json").toFile(),
-                leftReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
-                rightReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
+        File leftSahabReport = simpleSahabDirectory.resolve("report/left.json").toFile(),
+                rightSahabReport = simpleSahabDirectory.resolve("report/right.json").toFile(),
                 lineMapping = simpleSahabDirectory.resolve("project_data/line_mapping.csv").toFile(),
                 leftLineToVarFile = simpleSahabDirectory.resolve("project_data/left_line_to_var.csv").toFile(),
                 rightLineToVarFile = simpleSahabDirectory.resolve("project_data/right_line_to_var.csv").toFile();
@@ -70,10 +65,8 @@ public class StateDiffComputerTest<R> {
         Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = readMappingsFromFile(lineMapping);
 
         StateDiffComputer sdc = new StateDiffComputer(
-                leftBreakpoint,
-                rightBreakpoint,
-                leftReturn,
-                rightReturn,
+                leftSahabReport,
+                rightSahabReport,
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
@@ -81,7 +74,7 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertNull(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
+        assertEquals("tailZone.iID=TestDTZ1", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
         assertNull(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
     }
 
@@ -90,10 +83,8 @@ public class StateDiffComputerTest<R> {
     @Test
     void computeStateDiff_simple_diffIsGenerated_two() throws IOException, ParseException {
         Path simpleSahabDirectory = Paths.get("src/test/resources/sahab_reports/simple_two");
-        File leftBreakpoint = simpleSahabDirectory.resolve("breakpoint/left.json").toFile(),
-                rightBreakpoint = simpleSahabDirectory.resolve("breakpoint/right.json").toFile(),
-                leftReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
-                rightReturn = simpleSahabDirectory.resolve("return/right.json").toFile(),
+        File leftSahabReport = simpleSahabDirectory.resolve("report/left.json").toFile(),
+                rightSahabReport = simpleSahabDirectory.resolve("report/right.json").toFile(),
                 lineMapping = simpleSahabDirectory.resolve("project_data/line_mapping.csv").toFile(),
                 leftLineToVarFile = simpleSahabDirectory.resolve("project_data/left_line_to_var.csv").toFile(),
                 rightLineToVarFile = simpleSahabDirectory.resolve("project_data/right_line_to_var.csv").toFile();
@@ -104,10 +95,8 @@ public class StateDiffComputerTest<R> {
         Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = readMappingsFromFile(lineMapping);
 
         StateDiffComputer sdc = new StateDiffComputer(
-                leftBreakpoint,
-                rightBreakpoint,
-                leftReturn,
-                rightReturn,
+                leftSahabReport,
+                rightSahabReport,
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
@@ -115,8 +104,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal(), "id=\"TestDTZ1\"");
-        assertEquals(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal(), "next.iWallOffset=3600000");
+        assertEquals("id=TestDTZ1", stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal());
+        assertEquals("next.iWallOffset=3600000", stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal());
     }
 
     private Map<Integer, Set<String>> readLineVarsFromFile(File lineVarsFile) throws IOException {

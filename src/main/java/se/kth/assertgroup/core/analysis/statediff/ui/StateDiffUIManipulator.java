@@ -22,10 +22,8 @@ public class StateDiffUIManipulator {
 
     public void addStateDiffToExecDiffUI
             (
-                    File leftBreakPoint,
-                    File rightBreakPoint,
-                    File leftReturn,
-                    File rightReturn,
+                    File leftReport,
+                    File rightReport,
                     File srcFile,
                     File dstFile,
                     File ghFullDiff,
@@ -36,7 +34,7 @@ public class StateDiffUIManipulator {
 
         SrcLineVars srcLineVars = new SrcLineVars(srcFile), dstLineVars = new SrcLineVars(dstFile);
 
-        StateDiffComputer sdc = new StateDiffComputer(leftBreakPoint, rightBreakPoint, leftReturn, rightReturn,
+        StateDiffComputer sdc = new StateDiffComputer(leftReport, rightReport,
                 mappings.getLeft(), mappings.getRight(), srcLineVars.getLineVars(), dstLineVars.getLineVars());
 
         ProgramStateDiff psd = sdc.computeProgramStateDiff();
@@ -56,11 +54,11 @@ public class StateDiffUIManipulator {
             )
             throws Exception {
         if(stateDiff.getFirstOriginalUniqueStateInfo().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateInfo(), "patched", ghFullDiff, test);
+            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateInfo(), "original", ghFullDiff, test);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateInfo().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateInfo(), "original", ghFullDiff, test);
+            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateInfo(), "patched", ghFullDiff, test);
         }
     }
 
@@ -82,9 +80,8 @@ public class StateDiffUIManipulator {
 
     public static void main(String[] args) throws Exception {
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File("src/test/resources/sahab_reports/simple_two/breakpoint/left.json"),
-                new File("src/test/resources/sahab_reports/simple_two/breakpoint/right.json"),
-                null, null,
+                new File("src/test/resources/sahab_reports/simple_two/report/left.json"),
+                new File("src/test/resources/sahab_reports/simple_two/report/right.json"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"),
