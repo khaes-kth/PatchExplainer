@@ -48,28 +48,47 @@ public class StateDiffUIManipulator {
             )
             throws Exception {
         if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary(), "original", ghFullDiff, test);
+            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
+                    stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
+                    "variable", "original", ghFullDiff, test);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary(), "patched", ghFullDiff, test);
+            addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
+                    stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
+                    "variable", "patched", ghFullDiff, test);
+        }
+
+        if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
+                    stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
+                    "return", "original", ghFullDiff, test);
+        }
+
+        if(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal(),
+                    stateDiff.getPatchedUniqueReturn().getFirstUniqueVarValLine(),
+                    "return", "patched", ghFullDiff, test);
         }
     }
 
     private void addStateDiffToExecDiffUI
             (
-                    ProgramStateDiff.UniqueStateSummary toBeShownDiff,
+                    String diffStr,
+                    Integer diffLine,
+                    String diffType,
                     String versionName,
                     File ghFullDiff,
                     SelectedTest test
             ) throws Exception {
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
-        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", toBeShownDiff.getFirstUniqueVarValLine().toString())
+        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffStr)
+                .replace("{{diff-type}}", diffType)
                 .replace("{{test-link}}", test.getTestLink())
                 .replace("{{test-name}}", test.getTestName())
-                .replace("{{unique-state}}", toBeShownDiff.getFirstUniqueVarVal())
+                .replace("{{unique-state}}", diffStr)
                 .replace("{{unique-state-version}}", versionName);
-        ExecDiffHelper.addLineInfoAfter(toBeShownDiff.getFirstUniqueVarValLine(), stateDiffHtml, ghFullDiff);
+        ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff);
     }
 
     public static void main(String[] args) throws Exception {
