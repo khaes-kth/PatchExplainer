@@ -1,7 +1,6 @@
-package se.kth.assertgroup.core.analysis.satediff.models;
+package se.kth.assertgroup.core.analysis.statediff.models;
 
 import org.junit.jupiter.api.Test;
-import se.kth.assertgroup.core.analysis.statediff.models.SrcLineVars;
 
 import java.io.File;
 import java.nio.file.Paths;

@@ -1,10 +1,9 @@
-package se.kth.assertgroup.core.analysis.satediff.computer;
+package se.kth.assertgroup.core.analysis.statediff.computer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
-import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 
 import java.io.File;

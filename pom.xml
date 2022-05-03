@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>se.kth.assertgroup.core.analysis.trace.Main</mainClass>
+                            <mainClass>se.kth.assertgroup.core.analysis.statediff.ui.StateDiffUIManipulator</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

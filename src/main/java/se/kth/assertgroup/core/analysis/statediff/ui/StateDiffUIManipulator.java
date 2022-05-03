@@ -33,10 +33,6 @@ public class StateDiffUIManipulator {
 
         ProgramStateDiff psd = sdc.computeProgramStateDiff();
 
-//        ProgramStateDiff psd = new ProgramStateDiff();
-//        psd.setFirstOnlyOriginalState(Pair.of(372, "id=\"TestDTZ1\""));
-//        psd.setFirstOnlyPatchedState(Pair.of(369, "next.iWallOffset=3600000"));
-
         addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink));
     }
 
@@ -92,13 +88,24 @@ public class StateDiffUIManipulator {
     }
 
     public static void main(String[] args) throws Exception {
+        String leftReportPath = args[0], rightReportPath = args[1], leftSrcPath = args[2], rightSrcPath = args[3],
+                diffHtmlPath = args[4], testName = args[5], testLink = args[6];
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File("src/test/resources/sahab_reports/simple_two/report/left.json"),
-                new File("src/test/resources/sahab_reports/simple_two/report/right.json"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"),
-                "org.joda.time.TestPartial_Basics::testWith_baseAndArgHaveNoRange",
-                "http://example.com");
+                new File(leftReportPath),
+                new File(rightReportPath),
+                new File(leftSrcPath),
+                new File(rightSrcPath),
+                new File(diffHtmlPath),
+                testName,
+                testLink);
+
+//        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
+//                new File("src/test/resources/sahab_reports/simple_two/report/left.json"),
+//                new File("src/test/resources/sahab_reports/simple_two/report/right.json"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"),
+//                "org.joda.time.TestPartial_Basics::testWith_baseAndArgHaveNoRange",
+//                "http://example.com");
     }
 }

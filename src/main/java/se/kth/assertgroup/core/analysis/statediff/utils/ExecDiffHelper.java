@@ -35,7 +35,7 @@ public class ExecDiffHelper {
     }
 
     public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff) throws Exception {
-        Element tag = Jsoup.parse(infoHtml, "UTF-8", Parser.xmlParser());
+        Element tag = Jsoup.parse(infoHtml, "UTF-8", Parser.xmlParser()).children().first();
 
         Document doc = Jsoup.parse(ghDiff, "UTF-8");
 
