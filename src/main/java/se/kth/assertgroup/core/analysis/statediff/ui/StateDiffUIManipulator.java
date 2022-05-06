@@ -12,7 +12,9 @@ import java.io.File;
 import java.util.Map;
 
 public class StateDiffUIManipulator {
-    private static final File STATE_DIFF_WIDGET_TEMPLATE = new File("src/main/resources/state_diff/state_diff_widget.html");
+//    private static final File STATE_DIFF_WIDGET_TEMPLATE = new File("src/main/resources/state_diff/state_diff_widget.html");
+    private static final File STATE_DIFF_WIDGET_TEMPLATE =
+        new File("/home/khaes/phd/projects/explanation/code/Explainer/src/main/resources/state_diff/state_diff_widget.html");
 
     public void addStateDiffToExecDiffUI
             (
@@ -46,25 +48,25 @@ public class StateDiffUIManipulator {
         if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", "original", ghFullDiff, test);
+                    "variable", true, ghFullDiff, test);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", "patched", ghFullDiff, test);
+                    "variable", false, ghFullDiff, test);
         }
 
         if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", "original", ghFullDiff, test);
+                    "return", true, ghFullDiff, test);
         }
 
         if(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getPatchedUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", "patched", ghFullDiff, test);
+                    "return", false, ghFullDiff, test);
         }
     }
 
@@ -73,39 +75,39 @@ public class StateDiffUIManipulator {
                     String diffStr,
                     Integer diffLine,
                     String diffType,
-                    String versionName,
+                    boolean occursInOriginal,
                     File ghFullDiff,
                     SelectedTest test
             ) throws Exception {
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
-        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffStr)
+        stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffLine.toString())
                 .replace("{{diff-type}}", diffType)
                 .replace("{{test-link}}", test.getTestLink())
                 .replace("{{test-name}}", test.getTestName())
                 .replace("{{unique-state}}", diffStr)
-                .replace("{{unique-state-version}}", versionName);
-        ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff);
+                .replace("{{unique-state-version}}", occursInOriginal ? "original" : "patched");
+        ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff, occursInOriginal);
     }
 
     public static void main(String[] args) throws Exception {
-        String leftReportPath = args[0], rightReportPath = args[1], leftSrcPath = args[2], rightSrcPath = args[3],
-                diffHtmlPath = args[4], testName = args[5], testLink = args[6];
-        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File(leftReportPath),
-                new File(rightReportPath),
-                new File(leftSrcPath),
-                new File(rightSrcPath),
-                new File(diffHtmlPath),
-                testName,
-                testLink);
-
+//        String leftReportPath = args[0], rightReportPath = args[1], leftSrcPath = args[2], rightSrcPath = args[3],
+//                diffHtmlPath = args[4], testName = args[5], testLink = args[6];
 //        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-//                new File("src/test/resources/sahab_reports/simple_two/report/left.json"),
-//                new File("src/test/resources/sahab_reports/simple_two/report/right.json"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/gh_full_b2.html"),
-//                "org.joda.time.TestPartial_Basics::testWith_baseAndArgHaveNoRange",
-//                "http://example.com");
+//                new File(leftReportPath),
+//                new File(rightReportPath),
+//                new File(leftSrcPath),
+//                new File(rightSrcPath),
+//                new File(diffHtmlPath),
+//                testName,
+//                testLink);
+
+        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/75093e2c7b15373ef75dfeb8ab2e9ce16562fce5/left.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/75093e2c7b15373ef75dfeb8ab2e9ce16562fce5/right.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),
+                "org.joda.time.TestMonthDay_Basics::testPlusMonths_int_negativeFromLeap",
+                "http://example.com");
     }
 }

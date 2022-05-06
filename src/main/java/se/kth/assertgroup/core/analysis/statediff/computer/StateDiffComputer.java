@@ -171,12 +171,12 @@ public class StateDiffComputer {
                     JSONArray oppositeJsonStates,
                     List<Integer> oppositeTargetStateIndices
             ) throws IOException {
-        Set<String> distinctVarVals = extractVarVals("RETURN", jsonState);
+        Set<String> distinctVarVals = extractVarVals("{return-object}", jsonState);
 
         if (oppositeTargetStateIndices != null)
             for (int ind : oppositeTargetStateIndices) {
                 JSONObject oppositeState = ((JSONObject) oppositeJsonStates.get(ind));
-                distinctVarVals.removeAll(extractVarVals("RETURN", oppositeState));
+                distinctVarVals.removeAll(extractVarVals("{return-object}", oppositeState));
             }
 
         String shortestDistinctVarVal = null;

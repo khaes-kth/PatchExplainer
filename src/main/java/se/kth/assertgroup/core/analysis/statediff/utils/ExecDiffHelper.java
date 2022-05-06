@@ -34,15 +34,20 @@ public class ExecDiffHelper {
         return Pair.of(leftRightMapping, rightLeftMapping);
     }
 
-    public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff) throws Exception {
+    public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff, boolean isOriginalLine) throws Exception {
         Element tag = Jsoup.parse(infoHtml, "UTF-8", Parser.xmlParser()).children().first();
 
         Document doc = Jsoup.parse(ghDiff, "UTF-8");
 
         doc.outputSettings().prettyPrint(false);
 
-        doc.selectFirst("td[data-line-number={line}]".replace("{line}", line.toString())).parent()
-                .appendChild(tag);
+        int tdIndInParent = isOriginalLine ? 1 : 2;
+
+        Elements targetTds = doc.select("td[data-line-number={line}]".replace("{line}", line.toString()));
+        for (Element td : targetTds){
+            if(td.parent().children().get(tdIndInParent).attr("data-line-number").equals(line.toString()))
+                td.parent().appendChild(tag);
+        }
 
         FileUtils.writeStringToFile(ghDiff, doc.outerHtml(), "UTF-8");
     }
