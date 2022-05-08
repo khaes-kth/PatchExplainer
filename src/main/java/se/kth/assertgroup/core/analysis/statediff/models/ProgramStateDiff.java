@@ -71,6 +71,16 @@ public class ProgramStateDiff {
         public void setFirstUniqueReturnLine(Integer firstUniqueReturnLine) {
             this.firstUniqueReturnLine = firstUniqueReturnLine;
         }
+
+        @Override
+        public String toString() {
+            return "UniqueReturnSummary{" +
+                    "firstUniqueVarValLine=" + firstUniqueVarValLine +
+                    ", firstUniqueReturnLine=" + firstUniqueReturnLine +
+                    ", firstUniqueReturnHash=" + firstUniqueReturnHash +
+                    ", firstUniqueVarVal='" + firstUniqueVarVal + '\'' +
+                    '}';
+        }
     }
 
     public static class UniqueStateSummary {
@@ -108,5 +118,25 @@ public class ProgramStateDiff {
         public void setFirstUniqueVarVal(String firstUniqueVarVal) {
             this.firstUniqueVarVal = firstUniqueVarVal;
         }
+
+        @Override
+        public String toString() {
+            return "UniqueStateSummary{" +
+                    "firstUniqueStateLine=" + firstUniqueStateLine +
+                    ", firstUniqueVarValLine=" + firstUniqueVarValLine +
+                    ", firstUniqueStateHash=" + firstUniqueStateHash +
+                    ", firstUniqueVarVal='" + firstUniqueVarVal + '\'' +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ProgramStateDiff{" +
+                "firstOriginalUniqueStateSummary=" + firstOriginalUniqueStateSummary +
+                ", firstPatchedUniqueStateSummary=" + firstPatchedUniqueStateSummary +
+                ", originalUniqueReturn=" + originalUniqueReturn +
+                ", patchedUniqueReturn=" + patchedUniqueReturn +
+                '}';
     }
 }

@@ -10,8 +10,10 @@ import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class StateDiffUIManipulator {
+    private static final Logger logger = Logger.getLogger(StateDiffUIManipulator.class.getName());
 //    private static final File STATE_DIFF_WIDGET_TEMPLATE = new File("src/main/resources/state_diff/state_diff_widget.html");
     private static final File STATE_DIFF_WIDGET_TEMPLATE =
         new File("/home/khaes/phd/projects/explanation/code/Explainer/src/main/resources/state_diff/state_diff_widget.html");
@@ -30,10 +32,14 @@ public class StateDiffUIManipulator {
 
         SrcLineVars srcLineVars = new SrcLineVars(srcFile), dstLineVars = new SrcLineVars(dstFile);
 
+        logger.info("Line mappings and vars computed.");
+
         StateDiffComputer sdc = new StateDiffComputer(leftReport, rightReport,
                 mappings.getLeft(), mappings.getRight(), srcLineVars.getLineVars(), dstLineVars.getLineVars());
 
         ProgramStateDiff psd = sdc.computeProgramStateDiff();
+
+        logger.info(psd.toString());
 
         addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink));
     }
