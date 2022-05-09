@@ -9,14 +9,27 @@ import se.kth.assertgroup.core.analysis.statediff.models.SrcLineVars;
 import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class StateDiffUIManipulator {
     private static final Logger logger = Logger.getLogger(StateDiffUIManipulator.class.getName());
-//    private static final File STATE_DIFF_WIDGET_TEMPLATE = new File("src/main/resources/state_diff/state_diff_widget.html");
-    private static final File STATE_DIFF_WIDGET_TEMPLATE =
-        new File("/home/khaes/phd/projects/explanation/code/Explainer/src/main/resources/state_diff/state_diff_widget.html");
+    private static File STATE_DIFF_WIDGET_TEMPLATE;
+//    private static final File STATE_DIFF_WIDGET_TEMPLATE =
+//        new File("/home/khaes/phd/projects/explanation/code/Explainer/src/main/resources/state_diff/state_diff_widget.html");
+
+    static {
+        try {
+            STATE_DIFF_WIDGET_TEMPLATE = Files.createTempFile("", "state_diff_widget.html").toFile();
+            FileUtils.copyInputStreamToFile(
+                    StateDiffUIManipulator.class.getClassLoader().getResourceAsStream("state_diff_widget.html"),
+                    STATE_DIFF_WIDGET_TEMPLATE);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create temp widget file.");
+        }
+    }
 
     public void addStateDiffToExecDiffUI
             (
@@ -108,8 +121,8 @@ public class StateDiffUIManipulator {
 //                testLink);
 
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/75093e2c7b15373ef75dfeb8ab2e9ce16562fce5/left.json"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/75093e2c7b15373ef75dfeb8ab2e9ce16562fce5/right.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/6d1f1193014c19eb878ba794fb86686d92a5907e/left.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/6d1f1193014c19eb878ba794fb86686d92a5907e/right.json"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),

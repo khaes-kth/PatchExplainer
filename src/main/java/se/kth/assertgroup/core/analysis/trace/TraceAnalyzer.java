@@ -101,10 +101,10 @@ public class TraceAnalyzer {
                 GHHelper.getGHReports(slug, changeId, modifiedFilePaths, originalCoverages, patchedCoverages,
                         expandedVersionLink, changeType);
 
-        if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
-            System.out.println("Nothing printed because no execution diff exists for change: " + slug + "/" + changeId);
-            return;
-        }
+//        if (ghReports.getSummary().getLinesWithFewerExec() == 0 && ghReports.getSummary().getLinesWithMoreExec() == 0) {
+//            System.out.println("Nothing printed because no execution diff exists for change: " + slug + "/" + changeId);
+//            return;
+//        }
 
         outputDir.mkdirs();
         File unexpandedReportFile = outputDir.toPath().resolve(FINAL_GH_REPORT_FILENAME).toFile();
@@ -283,9 +283,9 @@ public class TraceAnalyzer {
 //                                "swagger-dubbo/src/main/java/com/deepoove/swagger/dubbo/web/SwaggerDubboController.java;",
 //                        "showHits-allColors;showHits;allColors; ");
 
-        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark");
-        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark2");
-        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/bears-benchmark2/target/trace");
+        File original = new File("/home/khaes/phd/projects/explanation/code/tmp/original");
+        File patched = new File("/home/khaes/phd/projects/explanation/code/tmp/patched");
+        File outputDir = new File("/home/khaes/phd/projects/explanation/code/tmp/patched/target/trace");
 //        new TraceAnalyzer()
 //                .generateTraceDiffsForGHCommit("brianfrankcooper/YCSB",
 //                        "0a43104985bb919cd4ffcc9e1c284e4a564d81cc",
@@ -301,14 +301,14 @@ public class TraceAnalyzer {
 //                        original, patched, outputDir, "http://example.com");
 
         new TraceAnalyzer()
-                .generateTraceDiffsForGHChange("khaes-kth/drr-as-pr",
-                        "71fd64576c62458912d339119064578c245af380",
+                .generateTraceDiffsForGHChange("khaes-kth/drr-execdiff",
+                        "6d1f1193014c19eb878ba794fb86686d92a5907e",
                         original, patched, outputDir, "http://example.com",
                         Arrays.asList(new String[]{
-                                "cxx-checks/src/main/java/org/sonar/cxx/checks/naming/MethodNameCheck.java"
+                                "Time-11/src/main/java/org/joda/time/tz/DateTimeZoneBuilder.java"
                         }),
                         GHHelper.ChangeType.COMMIT,
-                        "org.sonar.cxx.checks.naming.MethodNameCheckTest");
+                        "org.joda.time.tz.TestCompiler::testDateTimeZoneBuilder");
 
     }
 }

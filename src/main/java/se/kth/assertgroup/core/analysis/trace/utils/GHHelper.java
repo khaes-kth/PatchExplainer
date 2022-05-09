@@ -286,8 +286,8 @@ public class GHHelper {
             String path = diffElem.getAttribute("data-path");
 
             // TODO: remove the following line
-            if(!path.startsWith("src/"))
-                path = path.substring(path.indexOf("/") + 1);
+//            if(!path.startsWith("src/"))
+//                path = path.substring(path.indexOf("/") + 1);
 
             Map<Integer, Integer> originalCoverage = originalCoverages.get(path),
                     patchedCoverage = patchedCoverages.get(path);
