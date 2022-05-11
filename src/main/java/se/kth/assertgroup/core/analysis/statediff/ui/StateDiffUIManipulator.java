@@ -121,8 +121,8 @@ public class StateDiffUIManipulator {
 //                testLink);
 
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/6d1f1193014c19eb878ba794fb86686d92a5907e/left.json"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/6d1f1193014c19eb878ba794fb86686d92a5907e/right.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/left.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/right.json"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
                 new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),

@@ -53,7 +53,6 @@ public class CloverHelper {
         runMvnTest(projectDir, selectedTest);
 
 
-
         Map<String, Map<Integer, Integer>> res = new HashMap<>();
         for (String modifiedFilePath : modifiedFilePaths) {
             res.put(modifiedFilePath, getPerLineCoverage(projectDir, Path.of(modifiedFilePath)));
@@ -87,13 +86,15 @@ public class CloverHelper {
 
     private static void runMvnTest(File projectDir, String selectedTest) throws Exception {
         int exitVal = -1;
-        if(selectedTest == null)
+        if (selectedTest == null)
             exitVal = PH.run(projectDir, "Running maven....", "mvn", "clean",
-                "clover:setup", "test", "-fn", "-DfailIfNoTests=false", "clover:aggregate", "clover:clover",
-                "-Dmaven.clover.reportDescriptor=" + projectDir.getPath() + File.separator + CLOVER_TARGET_DESCRIPTOR_PATH);
+                    "clover:setup", "test", "-Dmaven.compiler.source=1.6", "-Dmaven.compiler.target=1.6",
+                    "-fn", "-DfailIfNoTests=false", "clover:aggregate", "clover:clover",
+                    "-Dmaven.clover.reportDescriptor=" + projectDir.getPath() + File.separator + CLOVER_TARGET_DESCRIPTOR_PATH);
         else
             exitVal = PH.run(projectDir, "Running maven....", "mvn", "clean", "-Dtest=" + selectedTest,
-                    "clover:setup", "test", "-fn", "-DfailIfNoTests=false", "clover:aggregate", "clover:clover",
+                    "clover:setup", "test", "-Dmaven.compiler.source=1.6", "-Dmaven.compiler.target=1.6",
+                    "-fn", "-DfailIfNoTests=false", "clover:aggregate", "clover:clover",
                     "-Dmaven.clover.reportDescriptor=" + projectDir + File.separator + CLOVER_TARGET_DESCRIPTOR_PATH);
         if (exitVal != 0)
             throw new Exception("Could not run mvn.");

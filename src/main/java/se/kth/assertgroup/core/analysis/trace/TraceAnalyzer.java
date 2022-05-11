@@ -302,13 +302,13 @@ public class TraceAnalyzer {
 
         new TraceAnalyzer()
                 .generateTraceDiffsForGHChange("khaes-kth/drr-execdiff",
-                        "6d1f1193014c19eb878ba794fb86686d92a5907e",
+                        "9c2d18b38dd7df29612bb9888c59d8cf262a7977",
                         original, patched, outputDir, "http://example.com",
                         Arrays.asList(new String[]{
-                                "Time-11/src/main/java/org/joda/time/tz/DateTimeZoneBuilder.java"
+                                "Math-2/src/main/java/org/apache/commons/math3/distribution/AbstractIntegerDistribution.java"
                         }),
                         GHHelper.ChangeType.COMMIT,
-                        "org.joda.time.tz.TestCompiler::testDateTimeZoneBuilder");
+                        "org.apache.commons.math3.distribution.HypergeometricDistributionTest::testMath1021");
 
     }
 }
