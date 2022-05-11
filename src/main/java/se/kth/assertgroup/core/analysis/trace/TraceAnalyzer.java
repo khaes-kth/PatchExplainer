@@ -8,7 +8,7 @@ import se.kth.assertgroup.core.analysis.trace.models.GHReports;
 import se.kth.assertgroup.core.analysis.trace.models.ReportConfig;
 import se.kth.assertgroup.core.analysis.trace.models.TraceInfo;
 import se.kth.assertgroup.core.analysis.trace.utils.CloverHelper;
-import se.kth.assertgroup.core.analysis.trace.utils.GHHelper;
+import se.kth.assertgroup.core.analysis.sharedutils.GHHelper;
 import se.kth.assertgroup.core.analysis.trace.utils.SpoonHelper;
 import se.kth.assertgroup.core.analysis.trace.models.LineMapping;
 

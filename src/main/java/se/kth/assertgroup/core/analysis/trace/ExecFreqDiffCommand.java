@@ -2,7 +2,7 @@ package se.kth.assertgroup.core.analysis.trace;
 
 import picocli.CommandLine;
 import se.kth.assertgroup.core.analysis.Constants;
-import se.kth.assertgroup.core.analysis.trace.utils.GHHelper;
+import se.kth.assertgroup.core.analysis.sharedutils.GHHelper;
 
 import java.io.File;
 import java.util.Arrays;

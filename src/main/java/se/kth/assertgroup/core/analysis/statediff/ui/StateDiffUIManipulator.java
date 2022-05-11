@@ -2,10 +2,11 @@ package se.kth.assertgroup.core.analysis.statediff.ui;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import se.kth.assertgroup.core.analysis.sharedutils.GHHelper;
 import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 import se.kth.assertgroup.core.analysis.statediff.models.SelectedTest;
-import se.kth.assertgroup.core.analysis.statediff.models.SrcLineVars;
+import se.kth.assertgroup.core.analysis.models.SourceInfo;
 import se.kth.assertgroup.core.analysis.statediff.utils.ExecDiffHelper;
 
 import java.io.File;
@@ -33,28 +34,41 @@ public class StateDiffUIManipulator {
 
     public void addStateDiffToExecDiffUI
             (
+                    String slug,
+                    String commit,
                     File leftReport,
                     File rightReport,
                     File srcFile,
                     File dstFile,
                     File ghFullDiff,
                     String testName,
-                    String testLink
+                    String testLink,
+                    String outputPath
             ) throws Exception {
+        SourceInfo srcInfo = new SourceInfo(srcFile), dstInfo = new SourceInfo(dstFile);
+
+        if(ghFullDiff == null){
+            ghFullDiff = GHHelper.getGHDiff(slug, commit, srcInfo, dstInfo);
+        }
+
         Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = ExecDiffHelper.getMappingFromExecDiff(ghFullDiff);
 
-        SrcLineVars srcLineVars = new SrcLineVars(srcFile), dstLineVars = new SrcLineVars(dstFile);
 
         logger.info("Line mappings and vars computed.");
 
         StateDiffComputer sdc = new StateDiffComputer(leftReport, rightReport,
-                mappings.getLeft(), mappings.getRight(), srcLineVars.getLineVars(), dstLineVars.getLineVars());
+                mappings.getLeft(), mappings.getRight(), srcInfo.getLineVars(), dstInfo.getLineVars());
 
         ProgramStateDiff psd = sdc.computeProgramStateDiff();
 
         logger.info(psd.toString());
 
         addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink));
+
+        File outputFile = new File(outputPath);
+        outputFile.createNewFile();
+
+        FileUtils.copyFile(ghFullDiff, outputFile);
     }
 
     private void addStateDiffToExecDiffUI
@@ -120,13 +134,13 @@ public class StateDiffUIManipulator {
 //                testName,
 //                testLink);
 
-        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/left.json"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/right.json"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
-                new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),
-                "org.joda.time.TestMonthDay_Basics::testPlusMonths_int_negativeFromLeap",
-                "http://example.com");
+//        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/left.json"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/right.json"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
+//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),
+//                "org.joda.time.TestMonthDay_Basics::testPlusMonths_int_negativeFromLeap",
+//                "http://example.com");
     }
 }

@@ -1,16 +1,26 @@
-package se.kth.assertgroup.core.analysis.trace.utils;
+package se.kth.assertgroup.core.analysis.sharedutils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import se.kth.assertgroup.core.analysis.models.CodeInterval;
+import se.kth.assertgroup.core.analysis.models.SourceInfo;
 import se.kth.assertgroup.core.analysis.trace.models.GHReports;
+import se.kth.assertgroup.core.analysis.trace.utils.PH;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 public class GHHelper {
@@ -58,7 +68,7 @@ public class GHHelper {
 
         List<String> modifiedSrcPaths = new ArrayList<>();
 
-        String commitUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, commit);
+        String commitUrl = getCommitUrl(slug, commit);
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -111,7 +121,7 @@ public class GHHelper {
             Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
 
             commitCnt = driver.findElements(By.cssSelector("[aria-label=\"View commit details\"]")).size();
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new Exception("Cannot load the PR page.");
         }
 
@@ -154,9 +164,9 @@ public class GHHelper {
                     ChangeType changeType
             ) {
         String pageUrl = null;
-        switch (changeType){
+        switch (changeType) {
             case COMMIT:
-                pageUrl = GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, id);
+                pageUrl = getCommitUrl(slug, id);
                 break;
             case PR:
                 pageUrl = GH_PR_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_PR_KEYWORD, pageUrl);
@@ -164,6 +174,48 @@ public class GHHelper {
         }
 
         return getGhReportsForDiffPage(modifiedFiles, originalCoverages, patchedCoverages, linkToExpanded, pageUrl);
+    }
+
+    private static String getCommitUrl(String slug, String id) {
+        return GH_COMMIT_URL_TEMPLATE.replace(GH_SLUG_KEYWORD, slug).replace(GH_COMMIT_KEYWORD, id);
+    }
+
+    private static File saveGhDiffInTempFile(String diffPageUrl) throws InterruptedException, IOException {
+        File reportFile = Files.createTempFile("", "gh_report.html").toFile();
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("headless");
+        WebDriver driver = new ChromeDriver(options);
+        try {
+            driver.get(diffPageUrl);
+            Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+
+            JavascriptExecutor jse = ((JavascriptExecutor) driver);
+
+            while (true) {
+                List<WebElement> expandableElems = driver.findElements(By.cssSelector("a.js-expand"));
+                if (expandableElems == null || expandableElems.isEmpty())
+                    break;
+
+                expandableElems.get(0).click();
+                Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
+            }
+
+            FileUtils.writeStringToFile(reportFile, driver.getPageSource(), "UTF-8");
+
+            // removing highlights for expanded lines
+            jse.executeScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
+                    ".forEach(e => e.classList.remove('blob-expanded'))");
+
+
+        } catch (Exception e) {
+            throw new Exception("Could not get the GH page.");
+        } finally {
+            driver.quit();
+            return null;
+        }
     }
 
     private static GHReports getGhReportsForDiffPage
@@ -333,7 +385,7 @@ public class GHHelper {
                 }
 
                 // extracting src and dst line numbers
-                if(colElems.size() < 2) { // probably a comment in a PR
+                if (colElems.size() < 2) { // probably a comment in a PR
                     jse.executeScript(("arguments[0].innerHTML = \"<td class=\\\"{classes}\\\" " +
                                     "style=\\\"text-align: center\\\">{exec-header}</td>\" + arguments[0].innerHTML")
                                     .replace("{classes}", colElems.get(0).getAttribute("class"))
@@ -467,7 +519,7 @@ public class GHHelper {
                 "a.href = \"{link-to-full}\";\n" +
                 "a.className = \"float-right ml-2\";\n" +
                 "var item = document.querySelector(\".d-flex.d-inline-block.float-right\") == null ? document.querySelector(\"#diffstat\") " +
-                    ": document.querySelector(\".d-flex.d-inline-block.float-right\");" +
+                ": document.querySelector(\".d-flex.d-inline-block.float-right\");" +
                 "item.parentNode.replaceChild(a, item);")
                 .replace("{link-to-full}", linkToExpanded)
                 .replace("{title}", "There are " + (showExpandWarning ? "some" : "no")
@@ -508,7 +560,60 @@ public class GHHelper {
         }
     }
 
-    public static enum ChangeType{
+    public static File getGHDiff(String slug, String commit, SourceInfo srcInfo, SourceInfo dstInfo)
+            throws IOException, InterruptedException {
+        File ghDiff = saveGhDiffInTempFile(getCommitUrl(slug, commit));
+
+        Document doc = Jsoup.parse(ghDiff, "UTF-8");
+
+        doc.outputSettings().prettyPrint(false);
+
+        Elements srcRows = doc.selectFirst("tbody").children();
+
+        CodeInterval srcMethodCxtInterval = new CodeInterval(), dstMethodCxtInterval = new CodeInterval();
+
+        for(Element tr : srcRows) {
+            Elements cols = tr.children();
+            try {
+                if(cols.get(0).hasAttr("data-line-number")
+                        && !cols.get(1).hasAttr("data-line-number")){
+                    srcMethodCxtInterval = srcInfo.getContainingMethodContextInterval
+                            (Integer.parseInt(cols.get(0).attr("data-line-number")));
+                }
+                if(!cols.get(0).hasAttr("data-line-number")
+                        && cols.get(1).hasAttr("data-line-number")){
+                    dstMethodCxtInterval = srcInfo.getContainingMethodContextInterval
+                            (Integer.parseInt(cols.get(1).attr("data-line-number")));
+                }
+            } catch (NumberFormatException e) {
+            }
+        };
+
+        for(Element tr : srcRows) {
+            Elements cols = tr.children();
+            boolean outOfMethod = true;
+            try {
+                if(cols.get(0).hasAttr("data-line-number")){
+                    int line = Integer.parseInt(cols.get(0).attr("data-line-number"));
+                    outOfMethod = outOfMethod && srcMethodCxtInterval.covers(line);
+                }
+                if(cols.get(1).hasAttr("data-line-number")){
+                    int line = Integer.parseInt(cols.get(1).attr("data-line-number"));
+                    outOfMethod = outOfMethod && dstMethodCxtInterval.covers(line);
+                }
+            } catch (NumberFormatException e) {
+            }
+
+            if(outOfMethod)
+                tr.remove();
+        }
+
+        FileUtils.writeStringToFile(ghDiff, doc.outerHtml(), "UTF-8");
+
+        return ghDiff;
+    }
+
+    public static enum ChangeType {
         PR,
         COMMIT
     }

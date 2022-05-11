@@ -13,6 +13,16 @@ import java.util.concurrent.Callable;
         description = "Generate execution frequency report for a given commit.")
 public class StateDiffCommand implements Callable<Integer> {
     @CommandLine.Option(
+            names = {Constants.ARG_SLUG},
+            description = "The slug of the commit repo.")
+    String slug;
+
+    @CommandLine.Option(
+            names = {Constants.ARG_COMMIT},
+            description = "The ID of the commit.")
+    String commit;
+
+    @CommandLine.Option(
             names = {Constants.ARG_LEFT_REPORT_PATH},
             description = "The path to the left report file.")
     File leftReport;
@@ -47,17 +57,25 @@ public class StateDiffCommand implements Callable<Integer> {
             description = "The link to the test code.")
     String testLink;
 
+    @CommandLine.Option(
+            names = {Constants.ARG_OUTPUT_PATH},
+            description = "The path to the output.")
+    String outputPath;
+
     @Override
     public Integer call() throws Exception {
 
         new StateDiffUIManipulator().addStateDiffToExecDiffUI(
+                slug,
+                commit,
                 leftReport,
                 rightReport,
                 leftSrc,
                 rightSrc,
                 traceDiffFullReport,
                 testName,
-                testLink);
+                testLink,
+                outputPath);
         return 0;
     }
 }
