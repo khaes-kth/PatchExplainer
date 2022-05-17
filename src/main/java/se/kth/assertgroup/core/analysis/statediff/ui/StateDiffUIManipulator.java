@@ -45,13 +45,16 @@ public class StateDiffUIManipulator {
                     String testLink,
                     String outputPath
             ) throws Exception {
+        boolean isHitDataIncluded = ghFullDiff != null;
+
         SourceInfo srcInfo = new SourceInfo(srcFile), dstInfo = new SourceInfo(dstFile);
 
         if(ghFullDiff == null){
             ghFullDiff = GHHelper.getGHDiff(slug, commit, srcInfo, dstInfo);
         }
 
-        Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings = ExecDiffHelper.getMappingFromExecDiff(ghFullDiff);
+        Pair<Map<Integer, Integer>, Map<Integer, Integer>> mappings =
+                ExecDiffHelper.getMappingFromExecDiff(ghFullDiff, isHitDataIncluded);
 
 
         logger.info("Line mappings and vars computed.");
@@ -63,7 +66,7 @@ public class StateDiffUIManipulator {
 
         logger.info(psd.toString());
 
-        addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink));
+        addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink), isHitDataIncluded);
 
         File outputFile = new File(outputPath);
         outputFile.createNewFile();
@@ -75,31 +78,32 @@ public class StateDiffUIManipulator {
             (
                     ProgramStateDiff stateDiff,
                     File ghFullDiff,
-                    SelectedTest test
+                    SelectedTest test,
+                    boolean isHitDataIncluded
             )
             throws Exception {
         if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", true, ghFullDiff, test);
+                    "variable", true, ghFullDiff, test, isHitDataIncluded);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", false, ghFullDiff, test);
+                    "variable", false, ghFullDiff, test, isHitDataIncluded);
         }
 
         if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", true, ghFullDiff, test);
+                    "return", true, ghFullDiff, test, isHitDataIncluded);
         }
 
         if(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getPatchedUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", false, ghFullDiff, test);
+                    "return", false, ghFullDiff, test, isHitDataIncluded);
         }
     }
 
@@ -110,7 +114,8 @@ public class StateDiffUIManipulator {
                     String diffType,
                     boolean occursInOriginal,
                     File ghFullDiff,
-                    SelectedTest test
+                    SelectedTest test,
+                    boolean isHitDataIncluded
             ) throws Exception {
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
         stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffLine.toString())
@@ -119,7 +124,7 @@ public class StateDiffUIManipulator {
                 .replace("{{test-name}}", test.getTestName())
                 .replace("{{unique-state}}", diffStr)
                 .replace("{{unique-state-version}}", occursInOriginal ? "original" : "patched");
-        ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff, occursInOriginal);
+        ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff, occursInOriginal, isHitDataIncluded);
     }
 
     public static void main(String[] args) throws Exception {
@@ -134,13 +139,16 @@ public class StateDiffUIManipulator {
 //                testName,
 //                testLink);
 
-//        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/left.json"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/b8cb14873a2b012b1c2438f7195ac90da72362e1/right.json"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/MonthDay.java"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/MonthDay.java"),
-//                new File("/home/khaes/phd/projects/explanation/code/tmp/output/gh_full_patch1-Time-14-Arja-plausible.html"),
-//                "org.joda.time.TestMonthDay_Basics::testPlusMonths_int_negativeFromLeap",
-//                "http://example.com");
+        new StateDiffUIManipulator().addStateDiffToExecDiffUI(
+                "khaes-kth/drr-execdiff",
+                "8b5b580751d1c08eb848e389ec3e7e235eea62d8",
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/8b5b580751d1c08eb848e389ec3e7e235eea62d8/left.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/output/sahab-reports/8b5b580751d1c08eb848e389ec3e7e235eea62d8/right.json"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/old-src/DateTimeZoneBuilder.java"),
+                new File("/home/khaes/phd/projects/explanation/code/tmp/new-src/DateTimeZoneBuilder.java"),
+                null,
+                "org.joda.time.tz.TestCompiler::testDateTimeZoneBuilder",
+                "http://example.com",
+                "/home/khaes/phd/projects/explanation/code/tmp/output/state_diff_patch1-Time-11-Cardumen.html");
     }
 }

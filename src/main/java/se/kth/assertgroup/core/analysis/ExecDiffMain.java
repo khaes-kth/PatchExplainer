@@ -12,8 +12,6 @@ import se.kth.assertgroup.core.analysis.trace.ExecFreqDiffCommand;
                 "The EXEC-DIFF command line tool for generating exec-frequency report and adding state diff info to it.",
         synopsisSubcommandLabel = "<COMMAND>")
 public class ExecDiffMain {
-
-
     public static void main(String[] args) {
         int exitCode = new CommandLine(new ExecDiffMain()).execute(args);
         System.exit(exitCode);

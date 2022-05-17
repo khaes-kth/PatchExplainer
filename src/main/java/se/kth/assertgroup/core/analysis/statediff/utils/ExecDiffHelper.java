@@ -14,7 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ExecDiffHelper {
-    public static Pair<Map<Integer, Integer>, Map<Integer, Integer>> getMappingFromExecDiff(File execDiffReport)
+    public static Pair<Map<Integer, Integer>, Map<Integer, Integer>> getMappingFromExecDiff
+            (File execDiffReport, boolean isHitDataIncluded)
             throws IOException {
         Map<Integer, Integer> leftRightMapping = new HashMap<>(), rightLeftMapping = new HashMap<>();
         Document doc = Jsoup.parse(execDiffReport, "UTF-8");
@@ -22,9 +23,10 @@ public class ExecDiffHelper {
 
         srcRows.forEach(tr -> {
             Elements cols = tr.children();
+            int leftLineNumCol = isHitDataIncluded ? 1 : 0;
             try {
-                int srcLine = Integer.parseInt(cols.get(1).attr("data-line-number")),
-                        dstLine = Integer.parseInt(cols.get(2).attr("data-line-number"));
+                int srcLine = Integer.parseInt(cols.get(leftLineNumCol).attr("data-line-number")),
+                        dstLine = Integer.parseInt(cols.get(leftLineNumCol + 1).attr("data-line-number"));
                 leftRightMapping.put(srcLine, dstLine);
                 rightLeftMapping.put(dstLine, srcLine);
             } catch (NumberFormatException e) {
@@ -34,14 +36,22 @@ public class ExecDiffHelper {
         return Pair.of(leftRightMapping, rightLeftMapping);
     }
 
-    public static void addLineInfoAfter(Integer line, String infoHtml, File ghDiff, boolean isOriginalLine) throws Exception {
+    public static void addLineInfoAfter
+            (
+                    Integer line,
+                    String infoHtml,
+                    File ghDiff,
+                    boolean isOriginalLine,
+                    boolean isHitDataIncluded
+            ) throws Exception {
         Element tag = Jsoup.parse(infoHtml, "UTF-8", Parser.xmlParser()).children().first();
 
         Document doc = Jsoup.parse(ghDiff, "UTF-8");
 
         doc.outputSettings().prettyPrint(false);
 
-        int tdIndInParent = isOriginalLine ? 1 : 2;
+        int tdIndInParent = isOriginalLine ? 0 : 1;
+        tdIndInParent += isHitDataIncluded ? 1 : 0;
 
         Elements targetTds = doc.select("td[data-line-number={line}]".replace("{line}", line.toString()));
         for (Element td : targetTds){

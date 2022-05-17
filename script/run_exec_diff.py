@@ -7,6 +7,7 @@ OUTPUT_DIR='/home/khaes/phd/projects/explanation/code/tmp/output'
 SAHAB_DIR='/home/khaes/phd/projects/explanation/code/tmp/collector-sahab'
 DRR_DIR='/home/khaes/phd/projects/explanation/code/tmp/drr-execdiff'
 MAIN_DIR='/home/khaes/phd/projects/explanation/code/tmp'
+SLUG='khaes-kth/drr-execdiff'
 
 def runFreqReportGenerator(changedFile, rightCommit, slug, testName):
     os.chdir(f'{DRR_DIR}')
@@ -21,19 +22,17 @@ def runFreqReportGenerator(changedFile, rightCommit, slug, testName):
 
 def runSahab(bugId, rightCommit, testName, changedFileName):
     os.chdir(f'{SAHAB_DIR}')
-    sahabCommand = f'python3 scripts/bribe-sahab.py -p {DRR_DIR}/{bugId} --left e5d67a8162aebb7dbd5df8cdc21442ef111d2ba1 --right {rightCommit} -t {testName} -c {changedFileName} 1>> {OUTPUT_DIR}/logs/sahab_{rightCommit}.log 2>> {OUTPUT_DIR}/logs/sahab_{rightCommit}.err'
-    print(sahabCommand)
+    sahabCommand = f'timeout 1000 python3 scripts/bribe-sahab.py -p {DRR_DIR}/{bugId} --left e5d67a8162aebb7dbd5df8cdc21442ef111d2ba1 --right {rightCommit} -t {testName} -c {changedFileName} 1>> {OUTPUT_DIR}/logs/sahab_{rightCommit}.log 2>> {OUTPUT_DIR}/logs/sahab_{rightCommit}.err'
     os.system(sahabCommand)
 
 def runStateDiffUIManipulator(rightCommit, testName, GHDiffPath, oldSrcPath, newSrcPath):
     sahabReportDir = f'{OUTPUT_DIR}/sahab-reports/{rightCommit}'
     os.chdir(f'{MAIN_DIR}')
+    outputPath = f'{OUTPUT_DIR}/state_diffs/state_diff_{rightCommit}.html'
     # javaCommand = f'java -jar explainer-cli.jar sdiff --left-report-path {sahabReportDir}/left.json --right-report-path {sahabReportDir}/right.json --left-src-path {oldSrcPath} --right-src-path {newSrcPath} --trace-diff-report-path {GHDiffPath} --selected-tests {testName} --test-link "http://example.com" 1>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.log 2>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.err'
-    javaCommand = f'java -jar explainer-cli.jar sdiff --left-report-path {sahabReportDir}/left.json --right-report-path {sahabReportDir}/right.json --left-src-path {oldSrcPath} --right-src-path {newSrcPath} --slug {slug} --commit {rightCommit} --selected-tests {testName} --test-link "http://example.com" 1>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.log 2>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.err'
+    javaCommand = f'timeout 1000 java -jar explainer-cli.jar sdiff --commit {rightCommit} --slug {SLUG} --left-report-path {sahabReportDir}/left.json --right-report-path {sahabReportDir}/right.json --left-src-path {oldSrcPath} --right-src-path {newSrcPath} --selected-tests {testName} --test-link http://example.com --output-path {outputPath} 1>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.log 2>> {OUTPUT_DIR}/logs/diff_computer_{rightCommit}.err'
     os.system(javaCommand)
-
-def prepareGHDiff(GHDiffPath):
-
+    os.system(f'chmod 777 {outputPath}')
 
 def process(patchName):
     # hitDiffReportPath = f'{DRR_DIR}/exec-diff-reports/{patchName}/gh_full.html'
@@ -65,10 +64,6 @@ def process(patchName):
     os.system(f'git checkout -f HEAD~1')
     os.system(f'cp {changedFile} {MAIN_DIR}/old-src/{changedFileName}')
     os.system(f'cp -R ./* {MAIN_DIR}/original/')
-
-    # if not exists(GHDiffPath):
-    #     prepareGHDiff(GHDiffPath)
-    #     return
 
     runSahab(bugId, rightCommit, testName, changedFileName)
 

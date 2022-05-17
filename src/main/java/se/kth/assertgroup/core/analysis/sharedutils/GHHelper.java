@@ -181,7 +181,7 @@ public class GHHelper {
     }
 
     private static File saveGhDiffInTempFile(String diffPageUrl) throws InterruptedException, IOException {
-        File reportFile = Files.createTempFile("", "gh_report.html").toFile();
+        File diffFile = Files.createTempFile("", "gh_report.html").toFile();
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
@@ -203,18 +203,17 @@ public class GHHelper {
                 Thread.sleep(SELENIUM_LOAD_WAIT_SEC);
             }
 
-            FileUtils.writeStringToFile(reportFile, driver.getPageSource(), "UTF-8");
-
             // removing highlights for expanded lines
             jse.executeScript("Array.from(document.getElementsByClassName('blob-expanded'))" +
                     ".forEach(e => e.classList.remove('blob-expanded'))");
 
+            FileUtils.writeStringToFile(diffFile, driver.getPageSource(), "UTF-8");
 
         } catch (Exception e) {
             throw new Exception("Could not get the GH page.");
         } finally {
             driver.quit();
-            return null;
+            return diffFile;
         }
     }
 
@@ -582,7 +581,7 @@ public class GHHelper {
                 }
                 if(!cols.get(0).hasAttr("data-line-number")
                         && cols.get(1).hasAttr("data-line-number")){
-                    dstMethodCxtInterval = srcInfo.getContainingMethodContextInterval
+                    dstMethodCxtInterval = dstInfo.getContainingMethodContextInterval
                             (Integer.parseInt(cols.get(1).attr("data-line-number")));
                 }
             } catch (NumberFormatException e) {
@@ -595,11 +594,11 @@ public class GHHelper {
             try {
                 if(cols.get(0).hasAttr("data-line-number")){
                     int line = Integer.parseInt(cols.get(0).attr("data-line-number"));
-                    outOfMethod = outOfMethod && srcMethodCxtInterval.covers(line);
+                    outOfMethod = outOfMethod && !srcMethodCxtInterval.covers(line);
                 }
                 if(cols.get(1).hasAttr("data-line-number")){
                     int line = Integer.parseInt(cols.get(1).attr("data-line-number"));
-                    outOfMethod = outOfMethod && dstMethodCxtInterval.covers(line);
+                    outOfMethod = outOfMethod && !dstMethodCxtInterval.covers(line);
                 }
             } catch (NumberFormatException e) {
             }
