@@ -586,7 +586,7 @@ public class GHHelper {
                 }
             } catch (NumberFormatException e) {
             }
-        };
+        }
 
         for(Element tr : srcRows) {
             Elements cols = tr.children();
