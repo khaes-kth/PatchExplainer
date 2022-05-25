@@ -76,6 +76,11 @@ public class StateDiffUIManipulator {
 
         logger.info("Line mappings and vars computed.");
 
+        long endOfLineMappingAndVarComputation = new Date().getTime();
+
+        logger.info("For commit " + commit + " line mappings and vars computation took "
+                + (endOfLineMappingAndVarComputation - processStartTime) + " MILLIS");
+
         StateDiffComputer sdc = new StateDiffComputer(leftReport, rightReport,
                 lineMappings.getLeft(), lineMappings.getRight(), srcInfo.getLineVars(), dstInfo.getLineVars());
 
@@ -86,7 +91,7 @@ public class StateDiffUIManipulator {
         long endOfDiffComputationTime = new Date().getTime();
 
         logger.info("For commit " + commit + " diff computation took "
-                + (endOfDiffComputationTime - processStartTime) + " MILLIS");
+                + (endOfDiffComputationTime - endOfLineMappingAndVarComputation) + " MILLIS");
 
         addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink), isHitDataIncluded);
 
