@@ -17,6 +17,7 @@ import spoon.reflect.declaration.CtElement;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -52,6 +53,7 @@ public class StateDiffUIManipulator {
                     String testLink,
                     String outputPath
             ) throws Exception {
+        long processStartTime = new Date().getTime();
         boolean isHitDataIncluded = ghFullDiff != null;
 
         Map<Integer, Integer> returnSrcToDstMappings = new HashMap<>(),
@@ -81,7 +83,17 @@ public class StateDiffUIManipulator {
 
         logger.info(psd.toString());
 
+        long endOfDiffComputationTime = new Date().getTime();
+
+        logger.info("For commit " + commit + " diff computation took "
+                + (endOfDiffComputationTime - processStartTime) + " MILLIS");
+
         addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink), isHitDataIncluded);
+
+        long endOfUIManipulationTime = new Date().getTime();
+
+        logger.info("For commit " + commit + " UI manipulation took "
+                + (endOfUIManipulationTime - endOfDiffComputationTime) + " MILLIS");
 
         File outputFile = new File(outputPath);
         outputFile.createNewFile();
