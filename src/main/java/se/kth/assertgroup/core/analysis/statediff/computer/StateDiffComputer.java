@@ -1,10 +1,12 @@
 package se.kth.assertgroup.core.analysis.statediff.computer;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import se.kth.assertgroup.core.analysis.Constants;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
 
 import java.io.File;
@@ -33,6 +35,13 @@ public class StateDiffComputer {
         this.rightLineToVars = rightLineToVars;
         this.leftRightLineMapping = leftRightLineMapping;
         this.rightLeftLineMapping = rightLeftLineMapping;
+
+        init();
+    }
+
+    private void init() throws IOException {
+        replaceSpecialStrsInReport(leftSahabReport);
+        replaceSpecialStrsInReport(rightSahabReport);
     }
 
     public ProgramStateDiff computeProgramStateDiff() throws IOException, ParseException {
@@ -56,6 +65,7 @@ public class StateDiffComputer {
                     File sahabReportFile,
                     File oppositeSahabReportFile
             ) throws IOException, ParseException {
+
         JSONParser parser = new JSONParser();
         JSONArray jsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(sahabReportFile))).get("return"),
                 oppositeJsonStates = (JSONArray) ((JSONObject) parser.parse(new FileReader(oppositeSahabReportFile))).get("return");
@@ -101,10 +111,26 @@ public class StateDiffComputer {
         return firstUniqueReturnSummary;
     }
 
-    private List<Pair<Integer, Integer>> getHashedReturnStates(JSONArray ja){
+    private void replaceSpecialStrsInReport(File sahabReportFile) throws IOException {
+        String reportStr = FileUtils.readFileToString(sahabReportFile, "UTF-8");
+        for(Pair<String, String> p : Constants.SPECIAL_REPORT_STR_MAPPING){
+            reportStr = reportStr.replaceAll(p.getKey(), p.getValue());
+        }
+        FileUtils.writeStringToFile(sahabReportFile,reportStr, "UTF-8");
+    }
+
+    private String deserializeSpecialStr(String str){
+        for(Pair<String, String> p : Constants.SPECIAL_REPORT_STR_MAPPING){
+            if(str.equals(p.getValue().replaceAll("\\\"", "")))
+                return p.getKey();
+        }
+        return str;
+    }
+
+    private List<Pair<Integer, Integer>> getHashedReturnStates(JSONArray ja) {
         List<Pair<Integer, Integer>> hashes = new ArrayList<>();
 
-        for(int i = 0; i < ja.size(); i++){
+        for (int i = 0; i < ja.size(); i++) {
             JSONObject jo = (JSONObject) ja.get(i);
             hashes.add(returnStateJsonToHash(jo));
         }
@@ -184,12 +210,12 @@ public class StateDiffComputer {
         for (String varVal : distinctVarVals) {
             if (shortestDistinctVarVal == null)
                 shortestDistinctVarVal = varVal;
-            else{
+            else {
                 int shortestLen = shortestDistinctVarVal.length(),
                         shortestParts = shortestDistinctVarVal.split("=")[0].split(".").length,
                         curParts = varVal.split("=")[0].split(".").length, curLen = varVal.length();
 
-                if(shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
+                if (shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
                     shortestDistinctVarVal = varVal;
             }
         }
@@ -219,12 +245,12 @@ public class StateDiffComputer {
         for (String varVal : distinctVarVals) {
             if (shortestDistinctVarVal == null)
                 shortestDistinctVarVal = varVal;
-            else{
+            else {
                 int shortestLen = shortestDistinctVarVal.length(),
                         shortestParts = shortestDistinctVarVal.split(".").length,
                         curParts = varVal.split(".").length, curLen = varVal.length();
 
-                if(shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
+                if (shortestParts > curParts || (shortestParts == curParts && shortestLen > curLen))
                     shortestDistinctVarVal = varVal;
             }
         }
@@ -267,11 +293,11 @@ public class StateDiffComputer {
                 String currentPrefix = prefix + "[" + i + "]";
                 varVals.addAll(extractVarVals(currentPrefix, nestedObj));
             }
-        }
-        else {
+        } else {
             // it's a leaf node
             String currentPrefix = prefix + (valueJo.containsKey("name") ? valueJo.get("name") : "");
-            varVals.add(currentPrefix + "=" + valueJo.get("value"));
+            String value = deserializeSpecialStr(valueJo.get("value").toString());
+            varVals.add(currentPrefix + "=" + value);
         }
 
         return varVals;
@@ -329,7 +355,7 @@ public class StateDiffComputer {
                 stateJO.get("runtimeValueCollection").toString().hashCode());
     }
 
-    private Pair<Integer, Integer> returnStateJsonToHash(JSONObject stateJO){
+    private Pair<Integer, Integer> returnStateJsonToHash(JSONObject stateJO) {
         int lineNumber = Integer.parseInt(stateJO.get("location").toString().split(":")[1]);
         return Pair.of(lineNumber,
                 ("" + stateJO.get("fields") + stateJO.get("value") + stateJO.get("arrayElements")).hashCode());

@@ -1,5 +1,11 @@
 package se.kth.assertgroup.core.analysis;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class Constants {
     public static final String EXEC_DIFF_COMMAND_NAME = "EXEC-DIFF";
 
@@ -20,4 +26,12 @@ public class Constants {
     public static final String ARG_RIGHT_SRC_PATH = "--right-src-path";
     public static final String ARG_TRACE_DIFF_FULL_REPORT_PATH = "--trace-diff-report-path";
     public static final String ARG_TEST_LINK = "--test-link";
+
+    public static final List<Pair<String, String>> SPECIAL_REPORT_STR_MAPPING = new ArrayList<>();
+
+    static {
+        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("NaN", "\"" + UUID.randomUUID().toString() + "\""));
+        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("Infinity", "\"" + UUID.randomUUID().toString() + "\""));
+        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("-Infinity", "\"" + UUID.randomUUID().toString() + "\""));
+    }
 }

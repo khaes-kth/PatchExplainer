@@ -1,6 +1,7 @@
 package se.kth.assertgroup.core.analysis.models;
 
 import org.apache.commons.lang3.tuple.Pair;
+import se.kth.assertgroup.core.analysis.statediff.ui.StateDiffUIManipulator;
 import spoon.Launcher;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtVariableRead;
@@ -12,8 +13,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class SourceInfo {
+    private static final Logger logger = Logger.getLogger(SourceInfo.class.getName());
     private static final int METHOD_CONTEXT_MARGIN = 3;
 
     private Map<Integer, Set<String>> lineVars;
@@ -33,11 +36,15 @@ public class SourceInfo {
         lineVars = new HashMap<>();
 
         model.filterChildren(new TypeFilter<>(CtVariableRead.class)).forEach(obj -> {
-            CtVariableRead var = (CtVariableRead) obj;
-            int line = var.getPosition().getLine();
-            if(!lineVars.containsKey(line))
-                lineVars.put(line, new HashSet<>());
-            lineVars.get(line).add(var.getVariable().getSimpleName());
+            try {
+                CtVariableRead var = (CtVariableRead) obj;
+                int line = var.getPosition().getLine();
+                if (!lineVars.containsKey(line))
+                    lineVars.put(line, new HashSet<>());
+                lineVars.get(line).add(var.getVariable().getSimpleName());
+            } catch (Exception e){
+                logger.info("Exception while going over variables.");
+            }
         });
     }
 
