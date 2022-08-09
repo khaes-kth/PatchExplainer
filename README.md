@@ -4,7 +4,7 @@ This project helps you detect program state differences between the exections of
 
 Running PatchExplainer requires the output of [collector-sahab](https://github.com/algomaster99/collector-sahab/) for running the test on the left and right versions of the program. The output of PatchExplainer is the Github Diff augmented with program state diff information.
 
-To obtain the result you have to run the following command:
+To obtain the result you have to build the jar file of PatchExplainer (with `mvn package -DskipTests`) and save it as `explainer-cli.jar` and then run the following command:
 
 ```
 java -jar explainer-cli.jar sdiff --commit {commit-id} --slug {SLUG} --left-report-path {sahabReportDir}/left.json --right-report-path {sahabReportDir}/right.json --left-src-path {oldSrcPath} --right-src-path {newSrcPath} --selected-tests {testName} --test-link {test-link} --output-path {state_diff.html}
