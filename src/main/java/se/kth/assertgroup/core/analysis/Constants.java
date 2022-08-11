@@ -28,10 +28,4 @@ public class Constants {
     public static final String ARG_TEST_LINK = "--test-link";
 
     public static final List<Pair<String, String>> SPECIAL_REPORT_STR_MAPPING = new ArrayList<>();
-
-    static {
-        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("NaN", "\"" + UUID.randomUUID().toString() + "\""));
-        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("Infinity", "\"" + UUID.randomUUID().toString() + "\""));
-        SPECIAL_REPORT_STR_MAPPING.add(Pair.of("-Infinity", "\"" + UUID.randomUUID().toString() + "\""));
-    }
 }

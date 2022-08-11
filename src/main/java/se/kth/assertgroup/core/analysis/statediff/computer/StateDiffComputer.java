@@ -40,8 +40,8 @@ public class StateDiffComputer {
     }
 
     private void init() throws IOException {
-        replaceSpecialStrsInReport(leftSahabReport);
-        replaceSpecialStrsInReport(rightSahabReport);
+//        replaceSpecialStrsInReport(leftSahabReport);
+//        replaceSpecialStrsInReport(rightSahabReport);
     }
 
     public ProgramStateDiff computeProgramStateDiff() throws IOException, ParseException {
@@ -109,22 +109,6 @@ public class StateDiffComputer {
         }
 
         return firstUniqueReturnSummary;
-    }
-
-    private void replaceSpecialStrsInReport(File sahabReportFile) throws IOException {
-        String reportStr = FileUtils.readFileToString(sahabReportFile, "UTF-8");
-        for(Pair<String, String> p : Constants.SPECIAL_REPORT_STR_MAPPING){
-            reportStr = reportStr.replaceAll(p.getKey(), p.getValue());
-        }
-        FileUtils.writeStringToFile(sahabReportFile,reportStr, "UTF-8");
-    }
-
-    private String deserializeSpecialStr(String str){
-        for(Pair<String, String> p : Constants.SPECIAL_REPORT_STR_MAPPING){
-            if(str.equals(p.getValue().replaceAll("\\\"", "")))
-                return p.getKey();
-        }
-        return str;
     }
 
     private List<Pair<Integer, Integer>> getHashedReturnStates(JSONArray ja) {
@@ -296,7 +280,7 @@ public class StateDiffComputer {
         } else {
             // it's a leaf node
             String currentPrefix = prefix + (valueJo.containsKey("name") ? valueJo.get("name") : "");
-            String value = deserializeSpecialStr(valueJo.get("value").toString());
+            String value = valueJo.get("value").toString();
             varVals.add(currentPrefix + "=" + value);
         }
 
