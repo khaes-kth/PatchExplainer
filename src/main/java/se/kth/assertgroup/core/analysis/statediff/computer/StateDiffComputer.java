@@ -280,7 +280,7 @@ public class StateDiffComputer {
         } else {
             // it's a leaf node
             String currentPrefix = prefix + (valueJo.containsKey("name") ? valueJo.get("name") : "");
-            String value = valueJo.get("value").toString();
+            String value = valueJo.get("value") + "";
             varVals.add(currentPrefix + "=" + value);
         }
 
