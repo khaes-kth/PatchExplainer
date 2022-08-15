@@ -38,7 +38,7 @@ public class ProgramStateDiff {
 
     public static class UniqueReturnSummary {
         private Integer firstUniqueVarValLine, firstUniqueReturnLine, firstUniqueReturnHash;
-        private String firstUniqueVarVal;
+        private String firstUniqueVarVal, differencingTest;
 
         public Integer getFirstUniqueVarValLine() {
             return firstUniqueVarValLine;
@@ -75,17 +75,26 @@ public class ProgramStateDiff {
         @Override
         public String toString() {
             return "UniqueReturnSummary{" +
-                    "firstUniqueVarValLine=" + firstUniqueVarValLine +
+                    "differencingTest=" + differencingTest +
+                    ", firstUniqueVarValLine=" + firstUniqueVarValLine +
                     ", firstUniqueReturnLine=" + firstUniqueReturnLine +
                     ", firstUniqueReturnHash=" + firstUniqueReturnHash +
                     ", firstUniqueVarVal='" + firstUniqueVarVal + '\'' +
                     '}';
         }
+
+        public String getDifferencingTest() {
+            return differencingTest;
+        }
+
+        public void setDifferencingTest(String differencingTest) {
+            this.differencingTest = differencingTest;
+        }
     }
 
     public static class UniqueStateSummary {
         private Integer firstUniqueStateLine, firstUniqueVarValLine, firstUniqueStateHash;
-        private String firstUniqueVarVal;
+        private String firstUniqueVarVal, differencingTest;
 
         public Integer getFirstUniqueStateLine() {
             return firstUniqueStateLine;
@@ -122,11 +131,20 @@ public class ProgramStateDiff {
         @Override
         public String toString() {
             return "UniqueStateSummary{" +
-                    "firstUniqueStateLine=" + firstUniqueStateLine +
+                    "differencingTest=" + differencingTest +
+                    ", firstUniqueStateLine=" + firstUniqueStateLine +
                     ", firstUniqueVarValLine=" + firstUniqueVarValLine +
                     ", firstUniqueStateHash=" + firstUniqueStateHash +
                     ", firstUniqueVarVal='" + firstUniqueVarVal + '\'' +
                     '}';
+        }
+
+        public String getDifferencingTest() {
+            return differencingTest;
+        }
+
+        public void setDifferencingTest(String differencingTest) {
+            this.differencingTest = differencingTest;
         }
     }
 

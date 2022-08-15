@@ -27,5 +27,7 @@ public class Constants {
     public static final String ARG_TRACE_DIFF_FULL_REPORT_PATH = "--trace-diff-report-path";
     public static final String ARG_TEST_LINK = "--test-link";
 
-    public static final List<Pair<String, String>> SPECIAL_REPORT_STR_MAPPING = new ArrayList<>();
+    public static final String TEST_SEPARATOR = ";";
+    public static final String TEST_METHOD_NAME_SEPARATOR = "::";
+    public static final String UNKNOWN_TEST = "unknown::unknown";
 }

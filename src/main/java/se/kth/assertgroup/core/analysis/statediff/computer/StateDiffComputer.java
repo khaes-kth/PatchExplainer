@@ -19,6 +19,7 @@ public class StateDiffComputer {
 
     private Map<Integer, Integer> leftRightLineMapping, rightLeftLineMapping;
     private Map<Integer, Set<String>> leftLineToVars, rightLineToVars;
+    private List<String> tests;
 
     public StateDiffComputer
             (
@@ -27,7 +28,8 @@ public class StateDiffComputer {
                     Map<Integer, Integer> leftRightLineMapping,
                     Map<Integer, Integer> rightLeftLineMapping,
                     Map<Integer, Set<String>> leftLineToVars,
-                    Map<Integer, Set<String>> rightLineToVars
+                    Map<Integer, Set<String>> rightLineToVars,
+                    List<String> tests
             ) throws IOException {
         this.leftSahabReport = leftSahabReport;
         this.rightSahabReport = rightSahabReport;
@@ -35,13 +37,7 @@ public class StateDiffComputer {
         this.rightLineToVars = rightLineToVars;
         this.leftRightLineMapping = leftRightLineMapping;
         this.rightLeftLineMapping = rightLeftLineMapping;
-
-        init();
-    }
-
-    private void init() throws IOException {
-//        replaceSpecialStrsInReport(leftSahabReport);
-//        replaceSpecialStrsInReport(rightSahabReport);
+        this.tests = tests;
     }
 
     public ProgramStateDiff computeProgramStateDiff() throws IOException, ParseException {
@@ -101,6 +97,9 @@ public class StateDiffComputer {
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
                 if (firstDistinctVarVal != null) {
+                    String executedTest =
+                            getMatchingTest((JSONArray) ((JSONObject) jsonStates.get(i)).get("stackTrace"));
+                    firstUniqueReturnSummary.setDifferencingTest(executedTest);
                     firstUniqueReturnSummary.setFirstUniqueVarValLine(lineNumber);
                     firstUniqueReturnSummary.setFirstUniqueVarVal(firstDistinctVarVal);
                     break;
@@ -165,6 +164,10 @@ public class StateDiffComputer {
                         oppositeJsonStates, oppositeLineToStateIndices.get(oppositeLineNumber));
 
                 if (firstDistinctVarVal != null) {
+                    String executedTest =
+                            getMatchingTest((JSONArray) ((JSONObject)((JSONArray)((JSONObject) jsonStates.get(i))
+                                    .get("stackFrameContexts")).get(0)).get("stackTrace"));
+                    firstUniqueStateSummary.setDifferencingTest(executedTest);
                     firstUniqueStateSummary.setFirstUniqueVarValLine(lineNumber);
                     firstUniqueStateSummary.setFirstUniqueVarVal(firstDistinctVarVal);
                     break;
@@ -173,6 +176,20 @@ public class StateDiffComputer {
         }
 
         return firstUniqueStateSummary;
+    }
+
+    private String getMatchingTest(JSONArray stackTraceJa){
+        for (String test : tests) {
+            String testClass = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[0],
+                    testMethod = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[1];
+
+            for(int i = 0; i < stackTraceJa.size(); i++){
+                String stackItem = stackTraceJa.get(i).toString();
+                if(stackItem.contains(testClass) && stackItem.contains(testMethod))
+                    return test;
+            }
+        }
+        return Constants.UNKNOWN_TEST;
     }
 
     private String identifyDistinctReturnVarVal

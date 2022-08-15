@@ -5,6 +5,7 @@ import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import se.kth.assertgroup.core.analysis.Constants;
 import se.kth.assertgroup.core.analysis.sharedutils.GHHelper;
 import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
 import se.kth.assertgroup.core.analysis.statediff.models.ProgramStateDiff;
@@ -17,10 +18,7 @@ import spoon.reflect.declaration.CtElement;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class StateDiffUIManipulator {
@@ -49,7 +47,7 @@ public class StateDiffUIManipulator {
                     File srcFile,
                     File dstFile,
                     File ghFullDiff,
-                    String testName,
+                    String testsStr,
                     String testLink,
                     String outputPath
             ) throws Exception {
@@ -82,7 +80,8 @@ public class StateDiffUIManipulator {
                 + (endOfLineMappingAndVarComputation - processStartTime) + " MILLIS");
 
         StateDiffComputer sdc = new StateDiffComputer(leftReport, rightReport,
-                lineMappings.getLeft(), lineMappings.getRight(), srcInfo.getLineVars(), dstInfo.getLineVars());
+                lineMappings.getLeft(), lineMappings.getRight(), srcInfo.getLineVars(), dstInfo.getLineVars(),
+                Arrays.asList(testsStr.split(Constants.TEST_SEPARATOR)));
 
         ProgramStateDiff psd = sdc.computeProgramStateDiff();
 
@@ -93,7 +92,7 @@ public class StateDiffUIManipulator {
         logger.info("For commit " + commit + " diff computation took "
                 + (endOfDiffComputationTime - endOfLineMappingAndVarComputation) + " MILLIS");
 
-        addStateDiffToExecDiffUI(psd, ghFullDiff, new SelectedTest(testName, testLink), isHitDataIncluded);
+        addStateDiffToExecDiffUI(psd, ghFullDiff, testLink, isHitDataIncluded);
 
         long endOfUIManipulationTime = new Date().getTime();
 
@@ -128,32 +127,37 @@ public class StateDiffUIManipulator {
             (
                     ProgramStateDiff stateDiff,
                     File ghFullDiff,
-                    SelectedTest test,
+                    String testLink,
                     boolean isHitDataIncluded
             )
             throws Exception {
         if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", true, ghFullDiff, test, isHitDataIncluded);
+                    "variable", true, ghFullDiff,
+                    stateDiff.getFirstOriginalUniqueStateSummary().getDifferencingTest(), testLink, isHitDataIncluded);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", false, ghFullDiff, test, isHitDataIncluded);
+                    "variable", false,
+                    ghFullDiff, stateDiff.getFirstPatchedUniqueStateSummary().getDifferencingTest(), testLink,
+                    isHitDataIncluded);
         }
 
         if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", true, ghFullDiff, test, isHitDataIncluded);
+                    "return", true, ghFullDiff,
+                    stateDiff.getOriginalUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
         }
 
         if(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal(),
                     stateDiff.getPatchedUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", false, ghFullDiff, test, isHitDataIncluded);
+                    "return", false, ghFullDiff,
+                    stateDiff.getPatchedUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
         }
     }
 
@@ -164,14 +168,15 @@ public class StateDiffUIManipulator {
                     String diffType,
                     boolean occursInOriginal,
                     File ghFullDiff,
-                    SelectedTest test,
+                    String testName,
+                    String testLink,
                     boolean isHitDataIncluded
             ) throws Exception {
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
         stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffLine.toString())
                 .replace("{{diff-type}}", diffType)
-                .replace("{{test-link}}", test.getTestLink())
-                .replace("{{test-name}}", test.getTestName())
+                .replace("{{test-link}}", testLink)
+                .replace("{{test-name}}", testName)
                 .replace("{{unique-state}}", diffStr)
                 .replace("{{unique-state-version}}", occursInOriginal ? "original" : "patched");
         ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff, occursInOriginal, isHitDataIncluded);

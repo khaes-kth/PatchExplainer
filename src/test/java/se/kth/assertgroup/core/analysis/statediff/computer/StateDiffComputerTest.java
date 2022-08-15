@@ -37,7 +37,7 @@ public class StateDiffComputerTest<R> {
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
-                rightLineToVars);
+                rightLineToVars, List.of("test::test"));
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
@@ -71,7 +71,7 @@ public class StateDiffComputerTest<R> {
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
-                rightLineToVars);
+                rightLineToVars, List.of("test::test"));
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
@@ -101,7 +101,7 @@ public class StateDiffComputerTest<R> {
                 mappings.getLeft(),
                 mappings.getRight(),
                 leftLineToVars,
-                rightLineToVars);
+                rightLineToVars, List.of("test::test"));
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
