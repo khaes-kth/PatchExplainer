@@ -179,6 +179,9 @@ public class StateDiffComputer {
     }
 
     private String getMatchingTest(JSONArray stackTraceJa){
+        if(tests.size() == 1)
+            return tests.get(0);
+        
         for (String test : tests) {
             String testClass = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[0],
                     testMethod = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[1];
