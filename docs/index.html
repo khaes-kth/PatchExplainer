@@ -1,28 +1,19 @@
 <html>
-  <body>
-    <script>
-        const fetchContents = async () => {
-            const response = await fetch('https://api.github.com/repos/khaes-kth/PatchExplainer/git/trees/master?recursive=1')
-            const data = response.json()
-
-            let htmlString = '<ul>'
-            htmlString += recurseInsideTree(data.tree)
-            htmlString += '</ul>'
-            document.getElementsByTagName('body')[0].innerHTML = htmlString;
-
-        }
-
-        const recurseInsideTree = (data) => {
-            let urlContents = ''
-            for (const file in data) {
-                if (file.path.includes('docs/') && file.type === 'blob') {
-                    urlContents += `<li><a href="./${file.path.substring(5)}">${file.path.substring(5)}</a></li>`;
+    <head>
+        <script type="text/javascript">
+            (async () => {
+                const response = await fetch('https://api.github.com/repos/khaes-kth/PatchExplainer/git/trees/master?recursive=1')
+                const data = await response.json()
+    
+                let htmlString = '<ul>'
+                for (const file of data.tree) {
+                    if (file.path.includes('docs/') && file.type === 'blob') {
+                        htmlString += `<li><a href="./${file.path.substring(5)}">${file.path.substring(5)}</a></li>`
+                    }
                 }
-            }
-            return urlContents
-        }
-
-        fetchContents()
-    </script>
-  <body>
+                htmlString += '</ul>'
+                document.getElementsByTagName('body')[0].innerHTML = htmlString;
+            })()
+        </script>
+    </head>
 </html>
