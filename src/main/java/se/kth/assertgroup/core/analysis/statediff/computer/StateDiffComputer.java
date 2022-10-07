@@ -181,14 +181,14 @@ public class StateDiffComputer {
     private String getMatchingTest(JSONArray stackTraceJa){
         if(tests.size() == 1)
             return tests.get(0);
-        
+
         for (String test : tests) {
-            String testClass = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[0],
-                    testMethod = test.split(Constants.TEST_METHOD_NAME_SEPARATOR)[1];
+            String[] testParts = test.split(Constants.TEST_METHOD_NAME_SEPARATOR);
+            String testClass = testParts[0], testMethod = testParts.length > 1 ? testParts[1] : null;
 
             for(int i = 0; i < stackTraceJa.size(); i++){
                 String stackItem = stackTraceJa.get(i).toString();
-                if(stackItem.contains(testClass) && stackItem.contains(testMethod))
+                if(stackItem.contains(testClass) && (testMethod != null && stackItem.contains(testMethod)))
                     return test;
             }
         }
