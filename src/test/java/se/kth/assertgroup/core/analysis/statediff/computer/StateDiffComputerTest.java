@@ -41,8 +41,8 @@ public class StateDiffComputerTest<R> {
 
         ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
 
-        assertEquals("RETURN.UTC.iID=UTC", stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal());
-        assertEquals("RETURN=null", stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal());
+        assertEquals("{return-object}.UTC.iID=UTC", stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal());
+        assertEquals("{return-object}=null", stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal());
 
 
         assertEquals("iRules.size=2", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());

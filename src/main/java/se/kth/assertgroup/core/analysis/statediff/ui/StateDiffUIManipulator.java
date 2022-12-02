@@ -134,14 +134,14 @@ public class StateDiffUIManipulator {
         if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", true, ghFullDiff,
+                    "state", true, ghFullDiff,
                     stateDiff.getFirstOriginalUniqueStateSummary().getDifferencingTest(), testLink, isHitDataIncluded);
         }
 
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "variable", false,
+                    "state", false,
                     ghFullDiff, stateDiff.getFirstPatchedUniqueStateSummary().getDifferencingTest(), testLink,
                     isHitDataIncluded);
         }
@@ -172,11 +172,14 @@ public class StateDiffUIManipulator {
                     String testLink,
                     boolean isHitDataIncluded
             ) throws Exception {
+        String displayableTestName = testName.contains("::") ? testName.split("::")[1] :
+                testName.split(".")[testName.split(".").length - 1];
+
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
         stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffLine.toString())
                 .replace("{{diff-type}}", diffType)
                 .replace("{{test-link}}", testLink)
-                .replace("{{test-name}}", testName)
+                .replace("{{test-name}}", displayableTestName)
                 .replace("{{unique-state}}", diffStr)
                 .replace("{{unique-state-version}}", occursInOriginal ? "original" : "patched");
         ExecDiffHelper.addLineInfoAfter(diffLine, stateDiffHtml, ghFullDiff, occursInOriginal, isHitDataIncluded);
