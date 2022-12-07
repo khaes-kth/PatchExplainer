@@ -131,13 +131,6 @@ public class StateDiffUIManipulator {
                     boolean isHitDataIncluded
             )
             throws Exception {
-        if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
-                    stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
-                    "state", true, ghFullDiff,
-                    stateDiff.getFirstOriginalUniqueStateSummary().getDifferencingTest(), testLink, isHitDataIncluded);
-        }
-
         if(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal() != null){
             addStateDiffToExecDiffUI(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal(),
                     stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarValLine(),
@@ -145,12 +138,11 @@ public class StateDiffUIManipulator {
                     ghFullDiff, stateDiff.getFirstPatchedUniqueStateSummary().getDifferencingTest(), testLink,
                     isHitDataIncluded);
         }
-
-        if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
-            addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
-                    stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
-                    "return", true, ghFullDiff,
-                    stateDiff.getOriginalUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
+        if(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal(),
+                    stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarValLine(),
+                    "state", true, ghFullDiff,
+                    stateDiff.getFirstOriginalUniqueStateSummary().getDifferencingTest(), testLink, isHitDataIncluded);
         }
 
         if(stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal() != null){
@@ -158,6 +150,12 @@ public class StateDiffUIManipulator {
                     stateDiff.getPatchedUniqueReturn().getFirstUniqueVarValLine(),
                     "return", false, ghFullDiff,
                     stateDiff.getPatchedUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
+        }
+        if(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal() != null){
+            addStateDiffToExecDiffUI(stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal(),
+                    stateDiff.getOriginalUniqueReturn().getFirstUniqueVarValLine(),
+                    "return", true, ghFullDiff,
+                    stateDiff.getOriginalUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
         }
     }
 
