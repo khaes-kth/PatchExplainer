@@ -171,7 +171,7 @@ public class StateDiffUIManipulator {
                     boolean isHitDataIncluded
             ) throws Exception {
         String displayableTestName = testName.contains("::") ? testName.split("::")[1] :
-                testName.split(".")[testName.split(".").length - 1];
+                testName.split("\\.")[testName.split("\\.").length - 1];
 
         String stateDiffHtml = FileUtils.readFileToString(STATE_DIFF_WIDGET_TEMPLATE, "UTF-8");
         stateDiffHtml = stateDiffHtml.replace("{{line-num}}", diffLine.toString())
