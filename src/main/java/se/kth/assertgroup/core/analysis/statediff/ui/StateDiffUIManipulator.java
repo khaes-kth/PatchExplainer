@@ -5,6 +5,8 @@ import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import se.kth.assertgroup.core.analysis.Constants;
 import se.kth.assertgroup.core.analysis.sharedutils.GHHelper;
 import se.kth.assertgroup.core.analysis.statediff.computer.StateDiffComputer;
@@ -157,6 +159,18 @@ public class StateDiffUIManipulator {
                     "return", true, ghFullDiff,
                     stateDiff.getOriginalUniqueReturn().getDifferencingTest(), testLink, isHitDataIncluded);
         }
+
+        fixHeaderSize(ghFullDiff);
+    }
+
+    private void fixHeaderSize(File ghFullDiff) throws IOException {
+        Document doc = Jsoup.parse(ghFullDiff, "UTF-8");
+
+        String outputHtml = doc.outerHtml();
+        outputHtml = outputHtml.replace("  <div class=\"container-xl d-flex flex-column flex-lg-row flex-items-center p-responsive height-full position-relative z-1\">",
+                "  <div class=\"container-xl d-flex flex-column flex-lg-row flex-items-center p-responsive position-relative z-1\">");
+
+        FileUtils.writeStringToFile(ghFullDiff, outputHtml, "UTF-8");
     }
 
     private void addStateDiffToExecDiffUI
