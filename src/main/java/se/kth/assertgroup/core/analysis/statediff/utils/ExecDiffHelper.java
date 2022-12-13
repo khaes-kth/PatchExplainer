@@ -60,6 +60,8 @@ public class ExecDiffHelper {
         }
 
         String outputHtml = doc.outerHtml();
+        outputHtml = outputHtml.replace("  <div class=\"container-xl d-flex flex-column flex-lg-row flex-items-center p-responsive height-full position-relative z-1\">",
+                "  <div class=\"container-xl d-flex flex-column flex-lg-row flex-items-center p-responsive position-relative z-1\">");
 
         FileUtils.writeStringToFile(ghDiff, outputHtml, "UTF-8");
     }
