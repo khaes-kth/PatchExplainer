@@ -39,7 +39,7 @@ public class StateDiffComputerTest<R> {
                 leftLineToVars,
                 rightLineToVars, List.of("test::test"));
 
-        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
+        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff(null);
 
         assertEquals("{return-object}.UTC.iID=UTC", stateDiff.getOriginalUniqueReturn().getFirstUniqueVarVal());
         assertEquals("{return-object}=null", stateDiff.getPatchedUniqueReturn().getFirstUniqueVarVal());
@@ -73,7 +73,7 @@ public class StateDiffComputerTest<R> {
                 leftLineToVars,
                 rightLineToVars, List.of("test::test"));
 
-        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
+        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff(null);
 
         assertEquals("tailZone.iID=TestDTZ1", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());
         assertNull(stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal());
@@ -103,7 +103,7 @@ public class StateDiffComputerTest<R> {
                 leftLineToVars,
                 rightLineToVars, List.of("test::test"));
 
-        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff();
+        ProgramStateDiff stateDiff = sdc.computeProgramStateDiff(null);
 
         assertEquals("id=TestDTZ1", stateDiff.getFirstOriginalUniqueStateSummary().getFirstUniqueVarVal());
         assertEquals("next.iWallOffset=3600000", stateDiff.getFirstPatchedUniqueStateSummary().getFirstUniqueVarVal());

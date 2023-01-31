@@ -17,6 +17,7 @@ import spoon.reflect.declaration.CtElement;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.logging.Logger;
@@ -49,7 +50,8 @@ public class StateDiffUIManipulator {
                     File ghFullDiff,
                     String testsStr,
                     String testLink,
-                    String outputPath
+                    String outputPath,
+                    String allDiffsReportPath
             ) throws Exception {
         long processStartTime = new Date().getTime();
         boolean isHitDataIncluded = ghFullDiff != null;
@@ -83,7 +85,12 @@ public class StateDiffUIManipulator {
                 lineMappings.getLeft(), lineMappings.getRight(), srcInfo.getLineVars(), dstInfo.getLineVars(),
                 Arrays.asList(testsStr.split(Constants.TEST_SEPARATOR)));
 
-        ProgramStateDiff psd = sdc.computeProgramStateDiff();
+        PrintWriter diffPrinter = allDiffsReportPath == null ? null : new PrintWriter(new File(allDiffsReportPath));
+
+        ProgramStateDiff psd = sdc.computeProgramStateDiff(diffPrinter);
+
+        if(diffPrinter != null)
+            diffPrinter.close();
 
         logger.info(psd.toString());
 
@@ -205,6 +212,7 @@ public class StateDiffUIManipulator {
                 null,
                 "org.apache.commons.lang3.time.FastDateParserTest::testLang1380",
                 "http://example.com",
-                "/home/khaes/phd/projects/explanation/code/tmp/dspot-on-sorald/4816441885916f66a16d8d2e21acc0e4fbd207cd.html");
+                "/home/khaes/phd/projects/explanation/code/tmp/dspot-on-sorald/4816441885916f66a16d8d2e21acc0e4fbd207cd.html",
+                null);
     }
 }

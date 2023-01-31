@@ -62,6 +62,11 @@ public class StateDiffCommand implements Callable<Integer> {
             description = "The path to the output.")
     String outputPath;
 
+    @CommandLine.Option(
+            names = {Constants.ARG_ALL_DIFFS_REPORT_PATH},
+            description = "The path to the report file for all diffs.")
+    String allDiffsReportPath;
+
     @Override
     public Integer call() throws Exception {
 
@@ -75,7 +80,8 @@ public class StateDiffCommand implements Callable<Integer> {
                 traceDiffFullReport,
                 testName,
                 testLink,
-                outputPath);
+                outputPath,
+                allDiffsReportPath);
         return 0;
     }
 }
